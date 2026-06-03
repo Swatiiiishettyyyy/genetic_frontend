@@ -20,7 +20,7 @@ export const accountNavigation = [
     ],
   },
   {
-    title: "My Orders",
+    title: "My Reports",
     items: [
       { label: "Blood Tests", icon: dashboardIcons.bloodTest, href: "/account/blood-tests" },
       { label: "Genetic Tests", icon: dashboardIcons.geneticTest, href: "/genetic-tests" },

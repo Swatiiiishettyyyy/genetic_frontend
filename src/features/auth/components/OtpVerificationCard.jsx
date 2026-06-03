@@ -1,6 +1,7 @@
 export function OtpVerificationCard({ content }) {
   function handleSubmit(event) {
     event.preventDefault();
+    localStorage.setItem("nucleotide_auth", "true");
     window.location.assign("/");
   }
 

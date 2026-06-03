@@ -7,9 +7,10 @@ import { AddAddressModal } from "../features/account/components/AddAddressModal.
 import { AddressEmptyState } from "../features/account/components/AddressEmptyState.jsx";
 import { AddressSelectionSection } from "../features/account/components/AddressSelectionSection.jsx";
 
-export function AccountAddressPage() {
+export function AccountAddressPage({ onMenuClick }) {
   const [isAddingAddress, setIsAddingAddress] = useState(false);
   const [hasConfirmedLocation, setHasConfirmedLocation] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   function handleConfirmLocation() {
     setHasConfirmedLocation(true);
@@ -18,10 +19,10 @@ export function AccountAddressPage() {
 
   return (
     <PageShell>
-      <AccountHeader profile={accountProfile} />
+      <AccountHeader profile={accountProfile} onProfileClick={() => setMobileMenuOpen(true)} onMenuClick={onMenuClick} />
 
-      <div className="mx-auto -mt-[clamp(3.25rem,5.4vw,6.4375rem)] grid w-full max-w-[106.25rem] gap-5 px-[clamp(1rem,4vw,5rem)] pb-[clamp(2rem,5vw,3rem)] lg:grid-cols-[clamp(12rem,18.8vw,22.5625rem)_minmax(0,1fr)]">
-        <AccountSidebar activeLabel="Address" navigation={accountNavigation} profile={accountProfile} />
+      <div className="mx-auto grid w-full max-w-[106.25rem] gap-5 px-[clamp(1rem,4vw,5rem)] pb-[clamp(2rem,5vw,3rem)] lg:-mt-[clamp(3.25rem,5.4vw,6.4375rem)] lg:grid-cols-[clamp(12rem,18.8vw,22.5625rem)_minmax(0,1fr)]">
+        <AccountSidebar activeLabel="Address" navigation={accountNavigation} profile={accountProfile} mobileOpen={mobileMenuOpen} onMobileClose={() => setMobileMenuOpen(false)} />
 
         {accountAddresses.length === 0 && !hasConfirmedLocation && (
           <AddressEmptyState onAddAddress={() => setIsAddingAddress(true)} />

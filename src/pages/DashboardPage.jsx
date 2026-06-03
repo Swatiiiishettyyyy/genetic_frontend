@@ -1,4 +1,5 @@
 import { BrandLogo } from "../components/BrandLogo.jsx";
+import { MobileNavbar } from "../components/MobileNavbar.jsx";
 import { PageShell } from "../components/ui/PageShell.jsx";
 import { dashboardModuleGroups, dashboardProfile } from "../data/dashboard.js";
 import { cn } from "../lib/cn.js";
@@ -39,14 +40,27 @@ function DashboardModuleGroup({ group }) {
   );
 }
 
-export function DashboardPage() {
+export function DashboardPage({ onMenuClick }) {
   return (
     <PageShell>
       <div className="min-h-dvh overflow-x-hidden bg-white">
+        <MobileNavbar onMenuClick={onMenuClick} className="sm:hidden" />
         <header className="bg-gradient-to-r from-nucleotide-night to-nucleotide-indigo text-white">
           <div className="mx-auto flex min-h-[clamp(15rem,24vw,21.5rem)] w-full max-w-[120rem] flex-col px-[clamp(1rem,8.333vw,10rem)] pb-[clamp(3.25rem,7vw,5.5rem)] pt-[clamp(1.375rem,3.2vw,3.125rem)]">
-            <div className="flex items-center justify-between gap-5">
-              <BrandLogo className="h-auto w-[clamp(10rem,16vw,18.8125rem)]" />
+            <div className="hidden items-center justify-between gap-5 sm:flex">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  aria-label="Open menu"
+                  onClick={onMenuClick}
+                  className="text-white/70 transition hover:text-white sm:hidden"
+                >
+                  <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" aria-hidden="true">
+                    <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </button>
+                <BrandLogo className="h-auto w-[clamp(10rem,16vw,18.8125rem)]" />
+              </div>
 
               <a
                 href="/account"

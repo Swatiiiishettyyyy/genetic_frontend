@@ -41,7 +41,7 @@ function CheckIcon() {
   );
 }
 
-export function FamilyProfileCard({ member }) {
+export function FamilyProfileCard({ member, onEdit }) {
   return (
     <article
       className={cn(
@@ -66,7 +66,7 @@ export function FamilyProfileCard({ member }) {
         </div>
 
         <div className="flex shrink-0 items-center gap-[clamp(0.5rem,1.2vw,0.75rem)] text-nucleotide-purple">
-          <button type="button" aria-label={`Edit ${member.name}`} className="transition hover:text-[#7447e8]">
+          <button type="button" onClick={onEdit} aria-label={`Edit ${member.name}`} className="transition hover:text-[#7447e8]">
             <EditIcon />
           </button>
           <button type="button" aria-label={`Delete ${member.name}`} className="transition hover:text-[#7447e8]">
