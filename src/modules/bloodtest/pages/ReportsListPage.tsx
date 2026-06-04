@@ -1,0 +1,463 @@
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Navbar, Footer } from '../components'
+import EmptyReportPage from './EmptyReportPage'
+import {
+  fetchMyReports,
+  fetchOrders,
+  fetchThyrocareMyOrders,
+  getMyReportRowKey,
+  thyrocareIdsForOrderItem,
+  type MyReportRow,
+  type Order,
+  type ThyrocareMyOrderRow,
+} from '../api/orders'
+import { fetchMembers, type Member } from '../api/member'
+import { useAuth } from '../../../shared/auth/AuthContext'
+
+const NAV_LINKS = [
+  { label: 'Tests', href: '/' },
+  { label: 'Packages', href: '/packages' },
+  { label: 'Reports', href: '/reports' },
+  { label: 'Metrics', href: '/metrics' },
+  { label: 'Orders', href: '/orders' },
+]
+
+function str(r: MyReportRow, ...keys: string[]): string {
+  for (const k of keys) {
+    const v = r[k]
+    if (v != null && String(v).trim()) return String(v).trim()
+  }
+  return ''
+}
+
+function initialsFromName(name: string): string {
+  const p = name.split(/\s+/).filter(Boolean)
+  if (p.length === 0) return '?'
+  if (p.length === 1) return p[0]!.slice(0, 2).toUpperCase()
+  return (p[0]![0] + p[1]![0]).toUpperCase()
+}
+
+function formatReportDate(raw: string): string {
+  if (!raw) return '—'
+  const d = new Date(raw)
+  if (Number.isNaN(d.getTime())) return raw
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+type ListReport = {
+  key: string
+  initials: string
+  name: string
+  patient: string
+  date: string
+  external: boolean
+  nucleotide: boolean
+  raw: MyReportRow
+}
+
+function ReportListSkeletonCard() {
+  return (
+    <div
+      className="reports-list-card"
+      style={{
+        background: '#fff',
+        border: '1px solid #F0F0F0',
+        borderRadius: 16,
+        padding: '20px 28px',
+        display: 'flex',
+        alignItems: 'center',
+        boxShadow: '0px 4px 27.3px 0px rgba(0,0,0,0.05)',
+      }}
+    >
+      <div className="organ-detail-skeleton" style={{ width: 48, height: 48, borderRadius: '50%', flexShrink: 0, marginRight: 20 }} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="organ-detail-skeleton" style={{ width: 'min(220px, 70%)', height: 16, borderRadius: 8, marginBottom: 10 }} />
+        <div className="organ-detail-skeleton" style={{ width: 'min(160px, 52%)', height: 13, borderRadius: 8, marginBottom: 12 }} />
+        <div className="organ-detail-skeleton" style={{ width: 116, height: 13, borderRadius: 8 }} />
+      </div>
+      <div className="organ-detail-skeleton" style={{ width: 8, height: 28, borderRadius: 8, marginLeft: 16 }} />
+    </div>
+  )
+}
+
+/** Nucleotide / API name, or family list lookup by `member_id` (not lab `patient_id`). */
+function resolveMemberDisplayName(r: MyReportRow, members: Member[]): string {
+  const fromApi = str(
+    r,
+    'patient_name',
+    'member_name',
+    'patientName',
+    'beneficiary_name',
+    'member_full_name',
+    'full_name',
+  )
+  if (fromApi) return fromApi
+  const midRaw = r.member_id ?? r.memberId
+  if (midRaw != null && String(midRaw).trim() !== '') {
+    const id = Number(midRaw)
+    const m = members.find(x => x.member_id === id)
+    if (m?.name?.trim()) {
+      const name = m.name.trim()
+      const rel = (m.relation ?? '').trim()
+      if (rel && !/^self$/i.test(rel)) return `${name} (${rel})`
+      return name
+    }
+  }
+  return ''
+}
+
+function normalizeThyrocareOrderId(raw: string): string {
+  return String(raw ?? '').trim().toUpperCase()
+}
+
+function allThyrocareOrderIdsOnReport(r: MyReportRow): Set<string> {
+  const s = new Set<string>()
+  const top = r.thyrocare_order_id ?? r.thyrocareOrderId
+  if (top != null && String(top).trim()) s.add(normalizeThyrocareOrderId(String(top)))
+  const results = r.results
+  if (Array.isArray(results)) {
+    for (const line of results) {
+      if (line == null || typeof line !== 'object') continue
+      const o = line as Record<string, unknown>
+      const tc = o.thyrocare_order_id ?? o.thyrocareOrderId
+      if (tc != null && String(tc).trim()) s.add(normalizeThyrocareOrderId(String(tc)))
+    }
+  }
+  return s
+}
+
+function thyrocareIdsForOrder(o: Order): Set<string> {
+  const s = new Set<string>()
+  const top = o.thyrocare_order_id?.trim()
+  if (top) s.add(normalizeThyrocareOrderId(top))
+  for (const it of o.items ?? []) {
+    for (const id of thyrocareIdsForOrderItem(it)) {
+      if (id.trim()) s.add(normalizeThyrocareOrderId(id))
+    }
+  }
+  return s
+}
+
+/** Maps Thyrocare booking id → Nucleotide `our_order_id` (from GET /thyrocare/orders/my-orders). */
+function buildThyrocareToOurOrderIdMap(rows: ThyrocareMyOrderRow[]): Map<string, number> {
+  const m = new Map<string, number>()
+  for (const row of rows) {
+    const tc = normalizeThyrocareOrderId(String(row.thyrocare_order_id ?? ''))
+    if (!tc) continue
+    const oid = row.our_order_id
+    if (oid == null || Number.isNaN(Number(oid))) continue
+    m.set(tc, Number(oid))
+  }
+  return m
+}
+
+function isNumericDbOrderId(v: unknown): boolean {
+  if (v == null) return false
+  const s = String(v).trim()
+  if (!s || s.includes('/')) return false
+  return /^\d+$/.test(s)
+}
+
+/** `order_number` from GET /orders/list — not my-reports `order_no`. Uses my-orders to bridge Thyrocare ids when list rows lack nested lab ids. */
+function resolveOrdersListOrderNumber(
+  r: MyReportRow,
+  orders: Order[],
+  thyrocareToOurOrderId: Map<string, number>,
+): string {
+  const idCandidates: unknown[] = [
+    r.our_order_id,
+    r.ourOrderId,
+    r.nucleotide_order_id,
+    r.nucleotideOrderId,
+    r.internal_order_id,
+  ]
+  if (isNumericDbOrderId(r.order_id)) idCandidates.push(r.order_id)
+  if (isNumericDbOrderId(r.orderId)) idCandidates.push(r.orderId)
+
+  for (const ourRaw of idCandidates) {
+    if (ourRaw == null || !String(ourRaw).trim()) continue
+    const key = String(ourRaw).trim()
+    const n = Number(key)
+    const byId = orders.find(
+      o =>
+        o.order_id != null &&
+        (String(o.order_id) === key || (!Number.isNaN(n) && o.order_id === n)),
+    )
+    if (byId?.order_number?.trim()) return byId.order_number.trim()
+  }
+
+  const tcOnReport = allThyrocareOrderIdsOnReport(r)
+  if (tcOnReport.size === 0) return ''
+
+  for (const tc of tcOnReport) {
+    const oid = thyrocareToOurOrderId.get(tc)
+    if (oid != null) {
+      const byId = orders.find(o => o.order_id != null && Number(o.order_id) === Number(oid))
+      if (byId?.order_number?.trim()) return byId.order_number.trim()
+    }
+  }
+
+  for (const o of orders) {
+    const orderTcs = thyrocareIdsForOrder(o)
+    for (const tc of tcOnReport) {
+      if (orderTcs.has(tc)) {
+        const num = o.order_number?.trim()
+        if (num) return num
+      }
+    }
+  }
+  return ''
+}
+
+function formatOrderNumberBadge(orderNumber: string): string {
+  const t = orderNumber.trim()
+  if (!t) return ''
+  return t.startsWith('#') ? t : `#${t}`
+}
+
+function hasNucleotideSource(r: MyReportRow): boolean {
+  const topSource = str(r, 'source', 'report_source', 'origin').toLowerCase()
+  if (topSource === 'nucleotide') return true
+
+  const results = r.results
+  if (!Array.isArray(results)) return false
+  return results.some(line => {
+    if (line == null || typeof line !== 'object' || Array.isArray(line)) return false
+    const o = line as Record<string, unknown>
+    const source = String(o.source ?? o.report_source ?? o.origin ?? '').trim().toLowerCase()
+    return source === 'nucleotide'
+  })
+}
+
+function mapRowToListItem(
+  r: MyReportRow,
+  index: number,
+  members: Member[],
+  orders: Order[],
+  thyrocareToOurOrderId: Map<string, number>,
+): ListReport {
+  const patientName = str(r, 'patient_name', 'member_name', 'patientName', 'beneficiary_name')
+  const source = str(r, 'source', 'report_source', 'origin').toLowerCase()
+  const external =
+    r.external === true ||
+    r.is_external === true ||
+    source === 'external' ||
+    source === 'user'
+  const nucleotide = !external && hasNucleotideSource(r)
+  const title = str(
+    r,
+    'product_name',
+    'package_name',
+    'report_name',
+    'title',
+    'order_name',
+    'productName',
+  )
+  const listOrderNumber = resolveOrdersListOrderNumber(r, orders, thyrocareToOurOrderId)
+  const orderBadge = listOrderNumber ? formatOrderNumberBadge(listOrderNumber) : ''
+  const memberLabel = resolveMemberDisplayName(r, members)
+  const name =
+    title || patientName || memberLabel || (orderBadge ? `Order ${orderBadge}` : 'Lab report')
+  const metaParts = [orderBadge || null, memberLabel || null].filter(Boolean) as string[]
+  const patient = metaParts.length ? metaParts.join(' · ') : memberLabel || '—'
+  const dateRaw = str(
+    r,
+    'report_date',
+    'sample_date',
+    'completed_at',
+    'created_at',
+    'updated_at',
+    'collected_date',
+    'reportDate',
+  )
+  return {
+    key: getMyReportRowKey(r, index),
+    initials: initialsFromName(memberLabel || patientName || name),
+    name,
+    patient,
+    date: formatReportDate(dateRaw),
+    external,
+    nucleotide,
+    raw: r,
+  }
+}
+
+export default function ReportsListPage() {
+  const navigate = useNavigate()
+  const { currentMember } = useAuth()
+  const [reports, setReports] = useState<MyReportRow[]>([])
+  const [orders, setOrders] = useState<Order[]>([])
+  const [thyrocareMyOrders, setThyrocareMyOrders] = useState<ThyrocareMyOrderRow[]>([])
+  const [members, setMembers] = useState<Member[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    void fetchMembers()
+      .then(list => {
+        if (!cancelled) setMembers(list)
+      })
+      .catch(() => {
+        if (!cancelled) setMembers([])
+      })
+    return () => { cancelled = true }
+  }, [])
+
+  const load = useCallback(() => {
+    setLoading(true)
+    setError(null)
+    void fetchOrders(currentMember?.member_id)
+      .then(setOrders)
+      .catch(() => setOrders([]))
+    void fetchThyrocareMyOrders(currentMember?.member_id)
+      .then(setThyrocareMyOrders)
+      .catch(() => setThyrocareMyOrders([]))
+    fetchMyReports(currentMember?.member_id ?? undefined)
+      .then(setReports)
+      .catch((e: unknown) => {
+        const err = e as { status?: number; data?: unknown }
+        const st = err?.status
+        let detail = ''
+        if (err?.data != null && typeof err.data === 'object' && 'detail' in (err.data as object)) {
+          detail = String((err.data as { detail?: unknown }).detail ?? '')
+        } else if (typeof err?.data === 'string') {
+          detail = err.data
+        }
+        setError(
+          st === 401
+            ? 'Not authorized to load reports. Your session token may be expired.'
+            : st
+              ? `Could not load reports (HTTP ${st}).${detail ? ` ${detail}` : ''} Try again.`
+              : 'Could not load reports. Check your connection and try again.',
+        )
+      })
+      .finally(() => setLoading(false))
+  }, [currentMember?.member_id])
+
+  useEffect(() => {
+    load()
+  }, [load])
+
+  const thyrocareToOurOrderId = useMemo(
+    () => buildThyrocareToOurOrderIdMap(thyrocareMyOrders),
+    [thyrocareMyOrders],
+  )
+
+  const mapped = useMemo(
+    () =>
+      reports.map((r, i) =>
+        mapRowToListItem(r, i, members, orders, thyrocareToOurOrderId),
+      ),
+    [reports, members, orders, thyrocareToOurOrderId],
+  )
+
+  const filtered = mapped
+
+  function handleOpenReport(row: ListReport) {
+    navigate(`/report?id=${encodeURIComponent(row.key)}`, { state: { report: row.raw } })
+  }
+
+  if (!loading && !error && reports.length === 0) {
+    return <EmptyReportPage />
+  }
+
+  return (
+    <div style={{ minHeight: '100vh', background: '#fff', fontFamily: "'Poppins', sans-serif" }}>
+      <Navbar logoSrc="/favicon.svg" logoAlt="Nucleotide" links={NAV_LINKS} ctaLabel="My Cart" hideSearchOnMobile onCtaClick={() => navigate('/cart')} />
+
+      <div
+        className="cart-breadcrumb"
+        style={{
+          padding: '14px clamp(16px, 5vw, 56px)',
+          borderBottom: '1px solid #F3F4F6',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+        }}
+      >
+        <span style={{ fontSize: 14, color: '#6B7280', cursor: 'pointer' }} onClick={() => navigate('/')}>Tests</span>
+        <span style={{ fontSize: 14, color: '#6B7280' }}>›</span>
+        <span style={{ fontSize: 14, color: '#111827', fontWeight: 500 }}>Reports</span>
+      </div>
+
+      <div className="reports-list-inner">
+        <div className="reports-header-row">
+          <div>
+            <h1 className="reports-page-title">My Reports</h1>
+            <p style={{ fontSize: 15, color: '#9CA3AF', margin: 0 }}>View, track, and understand your health data</p>
+          </div>
+        </div>
+
+        {error && (
+          <div style={{ padding: '16px clamp(16px, 5vw, 56px)', color: '#B91C1C', fontSize: 14 }}>
+            {error}{' '}
+            <button type="button" onClick={load} style={{ color: '#7C5CFC', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
+              Retry
+            </button>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="reports-list-stack" role="status" aria-label="Loading reports" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {[0, 1, 2].map(i => <ReportListSkeletonCard key={i} />)}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div style={{ padding: '40px clamp(16px, 5vw, 56px)', color: '#6B7280', fontSize: 15 }}>
+            No reports in this tab.
+          </div>
+        ) : (
+          <div className="reports-list-stack" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {filtered.map(r => (
+              <div
+                className="reports-list-card"
+                key={r.key}
+                role="button"
+                tabIndex={0}
+                onClick={() => void handleOpenReport(r)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    void handleOpenReport(r)
+                  }
+                }}
+                style={{
+                  background: '#fff',
+                  border: '1px solid #F0F0F0',
+                  borderRadius: 16,
+                  padding: '20px 28px ',
+                  display: 'flex',
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  boxShadow: '0px 4px 27.3px 0px rgba(0,0,0,0.05)',
+                  transition: 'box-shadow 0.15s ease',
+                }}
+              >
+                <div className="reports-list-avatar" style={{ width: 48, height: 48, borderRadius: '50%', background: '#EDE9FE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 500, color: '#7C5CFC', flexShrink: 0, marginRight: 20 }}>
+                  {r.initials}
+                </div>
+
+                <div className="reports-list-copy" style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: '#111827', marginBottom: 4 }}>{r.name}</div>
+                  <div style={{ fontSize: 13, color: '#9CA3AF' }}>{r.patient}</div>
+                  <span className="reports-list-date" style={{ fontSize: 13, color: '#9CA3AF', display: 'flex', alignItems: 'center', gap: 5, marginTop: 6 }}>
+                    <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="1" y="2" width="14" height="13" rx="2" stroke="#9CA3AF" strokeWidth="1.2"/><path d="M5 1v2M11 1v2M1 6h14" stroke="#9CA3AF" strokeWidth="1.2" strokeLinecap="round"/></svg>
+                    {r.date}
+                  </span>
+                </div>
+
+                <svg className="reports-list-chevron" width="8" height="14" viewBox="0 0 8 14" fill="none" aria-hidden="true">
+                  <path d="M1 1l6 6-6 6" stroke="#C4C4C4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <Footer />
+    </div>
+  )
+}

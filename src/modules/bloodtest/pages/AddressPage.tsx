@@ -1,0 +1,914 @@
+import { useState, useEffect, useMemo } from 'react'
+import profileIcon from '../assets/figma/checkout-pages/profile.svg'
+import familyIcon from '../assets/figma/checkout-pages/family.svg'
+import selectIcon from '../assets/figma/checkout-pages/select.svg'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { Navbar } from '../components'
+import { AddAddressModal } from '../components/AddAddressModal'
+import { CheckoutStepper } from '../components/CheckoutStepper'
+import { OrderSummaryCard } from '../components/OrderSummaryCard'
+import type { CartItem } from '../types'
+import { fetchMembers } from '../api/member'
+import { fetchAddresses, deleteAddress } from '../api/address'
+import {
+  fetchActiveGroups,
+  checkPincodeServiceability,
+  getCheckoutPriceSummary,
+  checkoutPatientCount,
+  upsertCartByProduct,
+  pullCheckoutSnapshot,
+} from '../api/cart'
+import { memberService } from '../../../shared/auth/memberService'
+import type { CartGroup } from '../api/cart'
+import type { Member } from '../api/member'
+import type { Address } from '../api/address'
+import type { CheckoutSession } from '../hooks/useCheckoutSession'
+import { useAuth } from '../../../shared/auth/AuthContext'
+import { ga4ItemsFromCart, trackGa4EcommerceEvent } from '../utils/ga4Ecommerce'
+import { ga4CustomCartParams, ga4CustomUserParams, trackGa4CustomEvent } from '../utils/ga4CustomEvents'
+import { checkoutHomePath, checkoutLabels, checkoutModuleFromPath, checkoutPathFromLocation } from '../utils/checkoutRoutes'
+
+function isSelfMember(m: Member): boolean {
+  return (m.relation ?? '').toLowerCase() === 'self'
+}
+
+const NAV_LINKS = [
+  { label: 'Tests', href: '/' },
+  { label: 'Packages', href: '/' },
+  { label: 'Reports', href: '#' },
+  { label: 'Metrics', href: '/metrics' },
+  { label: 'Orders', href: '#' },
+]
+
+const OVERLAY: React.CSSProperties = {
+  position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
+  zIndex: 100, display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+}
+// OVERLAY kept for potential future use
+
+interface AddressPageProps {
+  cartCount?: number
+  items: CartItem[]
+  session: CheckoutSession
+  onSessionUpdate: (patch: Partial<CheckoutSession>) => void
+  onUpsertGroup: (group: CartGroup) => void
+}
+
+export default function AddressPage({ cartCount, items, session, onSessionUpdate, onUpsertGroup }: AddressPageProps) {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const blockReason = (location.state as any)?.checkoutBlockReason as string | undefined
+  const isGeneticCheckout = session.checkoutKind === 'genetic-test'
+  const checkoutModule = checkoutModuleFromPath(location.pathname)
+  const labels = checkoutLabels(checkoutModule)
+
+  const { openAddMemberModal, refreshMembers, members: authMembers, isLoggedIn, user, currentMember } = useAuth()
+
+  const [members, setMembers] = useState<Member[]>([])
+  const [addresses, setAddresses] = useState<Address[]>([])
+  const [loading, setLoading] = useState(true)
+  const [memberMap, setMemberMap] = useState<Record<number, number[]>>({})
+  const [memberListFocus, setMemberListFocus] = useState<Record<number, 'profile' | 'family'>>({})
+  const [addressMap, setAddressMap] = useState<Record<number, number | null>>({})
+  const [previousAddressMap, setPreviousAddressMap] = useState<Record<number, number | null>>({})
+  const [serviceabilityMap, setServiceabilityMap] = useState<Record<number, { checking: boolean; serviceable: boolean | null; message?: string }>>({})
+  const [upsertError, setUpsertError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+
+  // member modal — tracks which productId triggered it (used by openAddMember)
+  const [_memberModalProductId, setMemberModalProductId] = useState<number | null>(null)
+
+  const [showAddressModal, setShowAddressModal] = useState(false)
+  const [editingAddress, setEditingAddress] = useState<Address | null>(null)
+  const [confirmDeleteMemberId, setConfirmDeleteMemberId] = useState<number | null>(null)
+  const [deletingMember, setDeletingMember] = useState(false)
+  const [confirmDeleteAddressId, setConfirmDeleteAddressId] = useState<number | null>(null)
+  const [deletingAddress, setDeletingAddress] = useState(false)
+
+const { total: displayTotal } = getCheckoutPriceSummary(items, {
+    thyrocarePricing: session.thyrocarePricing,
+    netPayableAmount: session.netPayableAmount,
+    groups: session.groups,
+    pricingSnapshotKey: session.pricingSnapshotKey,
+  })
+  const patientCount = useMemo(() => checkoutPatientCount(items), [items])
+
+  useEffect(() => {
+    async function init() {
+      try {
+        const [m, a, activeGroups] = await Promise.all([
+          fetchMembers(),
+          fetchAddresses(),
+          isGeneticCheckout ? Promise.resolve(session.groups) : fetchActiveGroups(),
+        ])
+        setMembers(m)
+        setAddresses(a)
+        const mMap: Record<number, number[]> = {}
+        const aMap: Record<number, number | null> = {}
+        const prevAMap: Record<number, number | null> = {}
+        for (const g of activeGroups) {
+          mMap[g.thyrocare_product_id] = (Array.isArray(g.member_ids) ? g.member_ids : []).filter((id): id is number => typeof id === 'number' && Number.isFinite(id) && id > 0)
+          prevAMap[g.thyrocare_product_id] = g.address_id ?? null
+          aMap[g.thyrocare_product_id] = null
+          onUpsertGroup(g)
+        }
+        for (const item of items) {
+          if (!item.thyrocareProductId) continue
+          const pid = item.thyrocareProductId
+          if (!mMap[pid]) {
+            const sg = session.groups.find(g => g.thyrocare_product_id === pid)
+            mMap[pid] = (Array.isArray(sg?.member_ids) ? sg.member_ids : []).filter((id): id is number => typeof id === 'number' && Number.isFinite(id) && id > 0)
+          }
+          if (aMap[pid] == null) aMap[pid] = null
+        }
+        setPreviousAddressMap(prevAMap)
+        // If user reduced patients on Cart, do not keep extra saved members here.
+        for (const item of items) {
+          const pid = item.thyrocareProductId
+          if (!pid) continue
+          const needed = Math.max(1, item.quantity || 1)
+          const cur = mMap[pid] ?? []
+          if (Array.isArray(cur) && cur.length > needed) {
+            mMap[pid] = cur.slice(0, needed)
+          }
+        }
+        setMemberMap(mMap)
+        setAddressMap(aMap)
+        // Pre-select the first address for any product with no saved address
+        if (a.length > 0) {
+          const firstAddr = a[0]
+          const preselected: Record<number, number> = {}
+          for (const item of items) {
+            const pid = item.thyrocareProductId
+            if (!pid || aMap[pid]) continue
+            preselected[pid] = firstAddr.address_id
+          }
+          if (Object.keys(preselected).length > 0) {
+            setAddressMap(prev => ({ ...prev, ...preselected }))
+            const pin = (firstAddr.postal_code ?? '').replace(/\D/g, '').slice(0, 6)
+            if (pin.length === 6) {
+              const pids = Object.keys(preselected).map(Number)
+              setServiceabilityMap(prev => {
+                const next = { ...prev }
+                for (const pid of pids) next[pid] = { checking: true, serviceable: null }
+                return next
+              })
+              checkPincodeServiceability(pin).then(result => {
+                setServiceabilityMap(prev => {
+                  const next = { ...prev }
+                  for (const pid of pids) next[pid] = { checking: false, serviceable: result.serviceable, message: result.message }
+                  return next
+                })
+              }).catch(() => {
+                setServiceabilityMap(prev => {
+                  const next = { ...prev }
+                  for (const pid of pids) next[pid] = { checking: false, serviceable: false, message: 'Could not verify pincode. Check your connection and try again.' }
+                  return next
+                })
+              })
+            }
+          }
+        }
+      } catch {
+        const mMap: Record<number, number[]> = {}
+        const aMap: Record<number, number | null> = {}
+        for (const item of items) {
+          if (!item.thyrocareProductId) continue
+          const pid = item.thyrocareProductId
+          const sg = session.groups.find(g => g.thyrocare_product_id === pid)
+          mMap[pid] = (Array.isArray(sg?.member_ids) ? sg.member_ids : []).filter((id): id is number => typeof id === 'number' && Number.isFinite(id) && id > 0)
+          aMap[pid] = sg?.address_id ?? null
+        }
+        for (const item of items) {
+          const pid = item.thyrocareProductId
+          if (!pid) continue
+          const needed = Math.max(1, item.quantity || 1)
+          const cur = mMap[pid] ?? []
+          if (Array.isArray(cur) && cur.length > needed) {
+            mMap[pid] = cur.slice(0, needed)
+          }
+        }
+        setMemberMap(mMap)
+        setAddressMap(aMap)
+      } finally {
+        setLoading(false)
+      }
+    }
+    init()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Keep member/address maps consistent with cart quantity when user goes back to Cart and edits patients.
+  // - If qty decreases: truncate selected members to match qty (can't keep extra members).
+  // - If qty increases: keep existing selection; user must add more members to reach qty.
+  useEffect(() => {
+    if (loading) return
+
+    setMemberMap(prev => {
+      let next = prev
+      let changed = false
+      for (const item of items) {
+        const pid = item.thyrocareProductId
+        if (!pid) continue
+        const needed = Math.max(1, item.quantity || 1)
+        const cur = next[pid] ?? []
+        if (!Array.isArray(cur)) continue
+        if (cur.length > needed) {
+          if (next === prev) next = { ...prev }
+          next[pid] = cur.slice(0, needed)
+          changed = true
+        } else if (!(pid in next)) {
+          if (next === prev) next = { ...prev }
+          next[pid] = cur
+          changed = true
+        }
+      }
+      return changed ? next : prev
+    })
+
+    setAddressMap(prev => {
+      let next = prev
+      let changed = false
+      for (const item of items) {
+        const pid = item.thyrocareProductId
+        if (!pid) continue
+        if (!(pid in next)) {
+          if (next === prev) next = { ...prev }
+          next[pid] = null
+          changed = true
+        }
+      }
+      return changed ? next : prev
+    })
+  }, [items, loading])
+
+
+  function setProductMembers(productId: number, memberIds: number[]) {
+    const safe = memberIds.filter((id): id is number => typeof id === 'number' && Number.isFinite(id) && id > 0)
+    setMemberMap(prev => ({ ...prev, [productId]: safe }))
+  }
+  async function selectProductAddress(productId: number, addressId: number) {
+    setAddressMap(prev => ({ ...prev, [productId]: addressId }))
+    const addr = addresses.find(a => a.address_id === addressId)
+    if (!addr?.postal_code || addr.postal_code.length !== 6) return
+    setServiceabilityMap(prev => ({ ...prev, [productId]: { checking: true, serviceable: null } }))
+    try {
+      const result = await checkPincodeServiceability(addr.postal_code)
+      setServiceabilityMap(prev => ({
+        ...prev,
+        [productId]: { checking: false, serviceable: result.serviceable, message: result.message },
+      }))
+    } catch {
+      setServiceabilityMap(prev => ({
+        ...prev,
+        [productId]: {
+          checking: false,
+          serviceable: false,
+          message: 'Could not verify pincode. Check your connection and try again.',
+        },
+      }))
+    }
+  }
+
+  const canContinue = items.every(item => {
+    if (!item.thyrocareProductId) return false
+    const pid = item.thyrocareProductId
+    const memberIds = memberMap[pid] ?? []
+    const addrId = addressMap[pid] ?? null
+    const svc = serviceabilityMap[pid] ?? { checking: false, serviceable: null }
+    return memberIds.length === item.quantity && addrId != null && (isGeneticCheckout || svc.serviceable === true) && !svc.checking
+  })
+
+  const continueReasons: string[] = []
+  if (!submitting) {
+    for (const item of items) {
+      if (!item.thyrocareProductId) continue
+      const pid = item.thyrocareProductId
+      const memberIds = memberMap[pid] ?? []
+      const addrId = addressMap[pid] ?? null
+      const svc = serviceabilityMap[pid] ?? { checking: false, serviceable: null }
+      const label = ` for "${item.name}"`
+      if (addrId == null) {
+        continueReasons.push(`Select an address${label}`)
+      } else if (svc.checking) {
+        continueReasons.push(`Verifying pincode${label}…`)
+      } else if (!isGeneticCheckout && svc.serviceable === false) {
+        continueReasons.push(`Pincode not serviceable${label}`)
+      }
+      const missing = item.quantity - memberIds.length
+      if (missing > 0) {
+        continueReasons.push(`Select ${missing} more patient${missing > 1 ? 's' : ''}${label}`)
+      }
+    }
+  }
+
+  async function handleContinue() {
+    if (!canContinue || submitting) return
+    setSubmitting(true)
+    setUpsertError(null)
+    try {
+      // IMPORTANT: upsert sequentially.
+      // Some backends race/500 when multiple `/thyrocare/cart/upsert` run concurrently for the same cart.
+      const updatedGroups: CartGroup[] = []
+      for (const item of items.filter(i => i.thyrocareProductId)) {
+        const pid = item.thyrocareProductId!
+        const memberIds = memberMap[pid] ?? []
+        const selectedAddressId = addressMap[pid] ?? null
+        if (!selectedAddressId) continue
+        const existingGroup = session.groups.find(g => g.thyrocare_product_id === pid)
+
+        let groupId: string = existingGroup?.group_id ?? `genetic-${pid}`
+        if (!isGeneticCheckout) {
+          try {
+            groupId = await upsertCartByProduct({
+              thyrocare_product_id: pid,
+              member_ids: memberIds,
+              address_id: selectedAddressId,
+              group_id: existingGroup?.group_id ?? null,
+            })
+          } catch (e: any) {
+            const msg =
+              (typeof e?.data?.message === 'string' && e.data.message) ||
+              (typeof e?.message === 'string' && e.message) ||
+              'Could not update cart. Please try again.'
+            throw new Error(`${msg} (${item.name})`)
+          }
+        }
+
+        const updated: CartGroup = {
+          ...(existingGroup ?? {
+            group_id: groupId,
+            thyrocare_product_id: pid,
+            product_name: item.name,
+            items: [],
+          }),
+          group_id: groupId,
+          member_ids: memberIds,
+          address_id: selectedAddressId,
+          appointment_date: existingGroup?.appointment_date ?? '',
+          appointment_start_time: existingGroup?.appointment_start_time ?? '',
+        }
+        updatedGroups.push(updated)
+        onUpsertGroup(updated)
+      }
+      const groupIds = updatedGroups.map(g => g.group_id).filter(Boolean)
+
+      if (groupIds.length === 0) {
+        setUpsertError('Could not save cart groups. Please try again.')
+        setSubmitting(false)
+        return
+      }
+
+      try {
+        if (isGeneticCheckout) {
+          onSessionUpdate({
+            checkoutKind: 'genetic-test',
+            cartItems: items,
+            groups: updatedGroups,
+            netPayableAmount: null,
+            thyrocarePricing: null,
+            pricingSnapshotKey: null,
+          })
+          navigate(checkoutPathFromLocation(location.pathname, 'timeslot'))
+          return
+        }
+
+        const snap = await pullCheckoutSnapshot({
+          previousGroups: updatedGroups,
+          localOnlyItems: [],
+          fallbackItems: items,
+        })
+        const nextItems = snap.cartItems.length > 0 ? snap.cartItems : items
+        const nextGroups = snap.groups.length > 0 ? snap.groups : updatedGroups
+        onSessionUpdate({
+          cartItems: nextItems,
+          groups: nextGroups,
+          netPayableAmount: null,
+          thyrocarePricing: null,
+          pricingSnapshotKey: null,
+        })
+        const { total } = getCheckoutPriceSummary(nextItems, {
+          thyrocarePricing: null,
+          netPayableAmount: null,
+          groups: nextGroups,
+          pricingSnapshotKey: null,
+        })
+        trackGa4CustomEvent('bt_address_continue', {
+          linkText: 'Continue',
+          testFor: authMembers
+            .filter(m => nextGroups.some(g => (g.member_ids ?? []).includes(Number(m.member_id ?? m.id))))
+            .map(m => m.relation || m.name)
+            .filter(Boolean)
+            .join(', '),
+          ...ga4CustomCartParams(nextItems),
+          ...ga4CustomUserParams({ isLoggedIn, user, currentMember }),
+        })
+        trackGa4EcommerceEvent('add_shipping_info', ga4ItemsFromCart(nextItems, {
+          listName: 'Address',
+          listId: 'BT_ADDRESS',
+        }), { value: total })
+        navigate(checkoutPathFromLocation(location.pathname, 'timeslot'))
+      } catch {
+        setUpsertError('Unable to confirm price, please retry.')
+        setSubmitting(false)
+        return
+      }
+    } catch (err: any) {
+      setUpsertError(
+        (typeof err?.message === 'string' && err.message) ||
+          err?.data?.message ||
+          'Failed to save your selection. Please try again.',
+      )
+    }
+    setSubmitting(false)
+  }
+
+  // Open the shared AddMemberModal; refresh local member list after save
+  function openAddMember(productId: number) {
+    setMemberModalProductId(productId)
+    openAddMemberModal()
+  }
+
+  async function handleDeleteAddress(addressId: number) {
+    setDeletingAddress(true)
+    try {
+      await deleteAddress(addressId)
+      setAddresses(prev => prev.filter(a => a.address_id !== addressId))
+      setAddressMap(prev => {
+        const next = { ...prev }
+        for (const pid in next) {
+          if (next[pid] === addressId) next[pid] = null
+        }
+        return next
+      })
+    } finally {
+      setDeletingAddress(false)
+      setConfirmDeleteAddressId(null)
+    }
+  }
+
+  async function handleDeleteMember(memberId: number) {
+    setDeletingMember(true)
+    try {
+      await memberService.deleteMember(memberId)
+      await refreshMembers()
+    } finally {
+      setDeletingMember(false)
+      setConfirmDeleteMemberId(null)
+    }
+  }
+
+  // Sync local member list whenever AuthContext members update (e.g. after AddMemberModal saves)
+  useEffect(() => {
+    setMembers(authMembers.map(m => ({
+      member_id: m.member_id ?? (m.id as number) ?? 0,
+      name: m.name,
+      relation: m.relation,
+      age: m.age ?? 0,
+      gender: m.gender ?? 'M',
+      dob: m.dob,
+      mobile: m.mobile,
+      is_self: m.is_self,
+    })))
+  }, [authMembers])
+
+  return (
+    <div style={{ minHeight: '100vh', background: '#fff', fontFamily: "'Poppins', sans-serif" }}>
+      <Navbar logoSrc="/favicon.svg" logoAlt="Nucleotide" links={NAV_LINKS} ctaLabel="My Cart" cartCount={cartCount} hideSearchOnMobile onCtaClick={() => navigate(checkoutPathFromLocation(location.pathname, 'cart'))} />
+
+      {/* Breadcrumb */}
+      <div
+        className="cart-breadcrumb"
+        style={{
+          padding: '14px clamp(16px, 5vw, 56px)',
+          borderBottom: '1px solid #F3F4F6',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+        }}
+      >
+        <span style={{ fontSize: 14, color: '#6B7280', cursor: 'pointer' }} onClick={() => navigate(checkoutHomePath(checkoutModule))}>{labels.navRoot}</span>
+        <span style={{ fontSize: 14, color: '#6B7280' }}>›</span>
+        <span style={{ fontSize: 14, color: '#111827', fontWeight: 500 }}>Checkout</span>
+      </div>
+
+      <CheckoutStepper activeStep={1} />
+      <div className="checkout-layout checkout-layout--address" style={{ display: 'flex', gap: 32, padding: '0 56px 60px', maxWidth: 1600, margin: '0 auto', alignItems: 'flex-start' }}>
+        <div className="checkout-leftcol" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 32 }}>
+          {blockReason && (
+            <div role="alert" style={{ background: '#FEF3C7', border: '1px solid #FCD34D', borderRadius: 12, padding: '10px 12px', fontSize: 13, color: '#92400E', fontFamily: 'Inter, sans-serif' }}>
+              {blockReason}
+            </div>
+          )}
+          {loading ? (
+            <p style={{ color: '#828282', fontSize: 14, fontFamily: 'Inter,sans-serif' }}>Loading...</p>
+          ) : (
+            <>
+              {/* Per-product: toggle + member selection */}
+              {items.map(item => {
+                if (!item.thyrocareProductId) return null
+                const productId = item.thyrocareProductId
+                const memberIds = memberMap[productId] ?? []
+                const needed = item.quantity
+                const focus = memberListFocus[productId] ?? 'profile'
+                const selfList = members.filter(isSelfMember)
+                const familyList = members.filter(m => !isSelfMember(m))
+                const showProfileList = focus === 'profile'
+                const showFamilyList = focus === 'family'
+
+                function renderMemberRow(member: Member) {
+                  const isSelected = memberIds.includes(member.member_id)
+                  const isDisabled = !isSelected && memberIds.length >= needed
+                  const self = isSelfMember(member)
+                  const isConfirmingDelete = confirmDeleteMemberId === member.member_id
+                  return (
+                    <div key={member.member_id}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          if (!isDisabled) {
+                            setProductMembers(productId, isSelected
+                              ? memberIds.filter(id => id !== member.member_id)
+                              : [...memberIds, member.member_id])
+                          }
+                        }
+                      }}
+                      onClick={() => {
+                        if (isDisabled) return
+                        setProductMembers(productId, isSelected
+                          ? memberIds.filter(id => id !== member.member_id)
+                          : [...memberIds, member.member_id])
+                      }}
+                      style={{
+                        background: '#fff', boxShadow: '0px 4px 27.3px rgba(0,0,0,0.05)', borderRadius: 20,
+                        outline: isSelected ? '1px solid #8B5CF6' : '1px solid #E7E1FF', outlineOffset: '-1px',
+                        padding: '14px 16px', cursor: isDisabled ? 'not-allowed' : 'pointer', opacity: isDisabled ? 0.5 : 1,
+                      }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <input type="checkbox" checked={isSelected} readOnly style={{ width: 18, height: 18, accentColor: '#8B5CF6', flexShrink: 0 }} />
+                        <img src={selectIcon} alt="" width={40} height={40} style={{ borderRadius: '50%', flexShrink: 0 }} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: 14, fontWeight: 500, color: '#161616', fontFamily: 'Poppins, sans-serif' }}>{member.name}</span>
+                            <span style={{ background: '#E7E1FF', borderRadius: 122, padding: '1px 10px', fontSize: 12, color: '#8B5CF6', fontFamily: 'Inter, sans-serif' }}>{member.relation}</span>
+                            {/* Edit icon */}
+                            <button
+                              onClick={e => { e.stopPropagation(); openAddMemberModal(member as any) }}
+                              title="Edit"
+                              style={{ background: 'none', border: 'none', padding: '2px 4px', cursor: 'pointer', color: '#9CA3AF', display: 'inline-flex', alignItems: 'center', borderRadius: 6 }}
+                            >
+                              <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                            {/* Delete icon — non-self only, blocked if selected */}
+                            {!self && (
+                              isConfirmingDelete ? (
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                  <button onClick={e => { e.stopPropagation(); setConfirmDeleteMemberId(null) }} style={{ background: 'none', border: '1px solid #D1D5DB', borderRadius: 6, padding: '1px 6px', fontSize: 11, cursor: 'pointer', color: '#6B7280' }}>Cancel</button>
+                                  <button onClick={e => { e.stopPropagation(); handleDeleteMember(member.member_id) }} disabled={deletingMember} style={{ background: 'none', border: '1px solid #FECACA', borderRadius: 6, padding: '1px 6px', fontSize: 11, cursor: 'pointer', color: '#DC2626', fontWeight: 600 }}>{deletingMember ? '…' : 'Delete'}</button>
+                                </span>
+                              ) : (
+                                <button
+                                  onClick={e => { e.stopPropagation(); if (!isSelected) setConfirmDeleteMemberId(member.member_id) }}
+                                  disabled={isSelected}
+                                  title={isSelected ? 'Deselect member first' : 'Delete'}
+                                  style={{ background: 'none', border: 'none', padding: '2px 4px', cursor: isSelected ? 'not-allowed' : 'pointer', color: isSelected ? '#D1D5DB' : '#9CA3AF', display: 'inline-flex', alignItems: 'center', borderRadius: 6 }}
+                                >
+                                  <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              )
+                            )}
+                          </div>
+                          <div style={{ fontSize: 12, color: '#828282', fontFamily: 'Inter, sans-serif' }}>{member.age} yr · {member.gender === 'M' ? 'Male' : 'Female'}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                }
+
+                return (
+                  <div key={productId} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    <div style={{
+                      background: 'linear-gradient(135deg, #F5F3FF 0%, #fff 100%)',
+                      borderRadius: 14, padding: '14px 16px', border: '1px solid #E7E1FF',
+                    }}>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: '#101129', fontFamily: 'Poppins, sans-serif' }}>
+                        {item.name} — select {needed} patient{needed !== 1 ? 's' : ''} for this order
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: 18 }}>
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        aria-pressed={showProfileList}
+                        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setMemberListFocus(p => ({ ...p, [productId]: 'profile' })) } }}
+                        onClick={() => setMemberListFocus(p => ({ ...p, [productId]: 'profile' }))}
+                        style={{
+                          flex: 1, minHeight: 72, borderRadius: 20,
+                          outline: showProfileList ? '2px solid #8B5CF6' : '1px solid #E7E1FF',
+                          outlineOffset: '-1px', background: '#fff', boxShadow: '0px 4px 27.3px rgba(0,0,0,0.05)',
+                          display: 'flex', alignItems: 'center', gap: 14, padding: '0 16px', cursor: 'pointer',
+                        }}
+                      >
+                        <img src={profileIcon} alt="" width={40} height={40} style={{ borderRadius: '50%' }} />
+                        <div>
+                          <div style={{ fontSize: 14, fontWeight: 500, color: '#161616', fontFamily: 'Poppins, sans-serif' }}>For Myself</div>
+                          <div style={{ fontSize: 12, color: '#828282', fontFamily: 'Inter, sans-serif' }}>
+                            Your profile only
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        aria-pressed={showFamilyList}
+                        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setMemberListFocus(p => ({ ...p, [productId]: 'family' })) } }}
+                        onClick={() => setMemberListFocus(p => ({ ...p, [productId]: 'family' }))}
+                        style={{
+                          flex: 1, minHeight: 72, borderRadius: 20,
+                          outline: showFamilyList ? '2px solid #8B5CF6' : '1px solid #E7E1FF',
+                          outlineOffset: '-1px', background: '#fff', boxShadow: '0px 4px 27.3px rgba(0,0,0,0.05)',
+                          display: 'flex', alignItems: 'center', gap: 14, padding: '0 16px', cursor: 'pointer',
+                        }}
+                      >
+                        <img src={familyIcon} alt="" width={40} height={40} style={{ borderRadius: '50%' }} />
+                        <div>
+                          <div style={{ fontSize: 14, fontWeight: 500, color: '#161616', fontFamily: 'Poppins, sans-serif' }}>For Family</div>
+                          <div style={{ fontSize: 12, color: '#828282', fontFamily: 'Inter, sans-serif' }}>
+                            Family members list
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: 15, fontWeight: 500, color: '#161616', fontFamily: 'Poppins, sans-serif' }}>
+                          Selected <span style={{ fontSize: 12, color: '#828282', fontWeight: 400 }}>({memberIds.length}/{needed})</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => openAddMember(productId)}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: 32,
+                            padding: '0 14px',
+                            borderRadius: 56,
+                            outline: '1px solid #8B5CF6',
+                            outlineOffset: '-1px',
+                            border: 'none',
+                            background: 'transparent',
+                            fontSize: 13,
+                            fontFamily: 'Inter, sans-serif',
+                            color: '#101129',
+                            cursor: 'pointer',
+                            whiteSpace: 'nowrap',
+                            flexShrink: 0,
+                          }}
+                        >
+                          Add New +
+                        </button>
+                      </div>
+
+                      {showProfileList && (
+                        <>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: '#6B7280', fontFamily: 'Inter, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Your profile</div>
+                          {selfList.length === 0 ? (
+                            <p style={{ fontSize: 13, color: '#828282', fontFamily: 'Inter, sans-serif', margin: 0 }}>No self profile yet. Use Add New + with relation Self, or switch to For Family.</p>
+                          ) : (
+                            selfList.map(renderMemberRow)
+                          )}
+                        </>
+                      )}
+
+                      {showFamilyList && (
+                        <>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: '#6B7280', fontFamily: 'Inter, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Family members</div>
+                          {familyList.length === 0 ? (
+                            <p style={{ fontSize: 13, color: '#828282', fontFamily: 'Inter, sans-serif', margin: 0 }}>No family members yet. Use Add New +, or switch to For Myself.</p>
+                          ) : (
+                            familyList.map(renderMemberRow)
+                          )}
+                        </>
+                      )}
+                    </div>
+
+                    <div style={{ height: 1, background: '#F3F4F6', margin: '8px 0' }} />
+                  </div>
+                )
+              })}
+
+              {/* Per-product address section (one product group = one address) */}
+              {items.filter(i => i.thyrocareProductId).map(item => {
+                const pid = item.thyrocareProductId!
+                const selectedAddressId = addressMap[pid] ?? null
+                const serviceability = serviceabilityMap[pid] ?? { checking: false, serviceable: null as boolean | null, message: undefined as string | undefined }
+                return (
+                  <div key={`addr-${pid}`} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: 15, fontWeight: 500, color: '#161616', fontFamily: 'Poppins, sans-serif' }}>
+                        {item.name} — Collection Address
+                      </span>
+                      <button
+                        onClick={() => setShowAddressModal(true)}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          height: 32,
+                          padding: '0 14px',
+                          borderRadius: 56,
+                          outline: '1px solid #8B5CF6',
+                          outlineOffset: '-1px',
+                          border: 'none',
+                          background: 'transparent',
+                          fontSize: 13,
+                          fontFamily: 'Inter, sans-serif',
+                          color: '#101129',
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap',
+                          flexShrink: 0,
+                        }}
+                      >
+                        Add New +
+                      </button>
+                    </div>
+                    {addresses.map(addr => {
+                      const isSelected = selectedAddressId === addr.address_id
+                      const isPreviouslyUsed = !isSelected && previousAddressMap[pid] === addr.address_id
+                      return (
+                        <div key={`${pid}-${addr.address_id}`} onClick={() => { setConfirmDeleteAddressId(null); selectProductAddress(pid, addr.address_id) }}
+                          style={{
+                            background: '#fff', boxShadow: '0px 4px 27.3px rgba(0,0,0,0.05)', borderRadius: 20,
+                            outline: isSelected ? '1px solid #8B5CF6' : '1px solid #E7E1FF',
+                            outlineOffset: '-1px', padding: '14px 16px', cursor: 'pointer',
+                          }}>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                            {isSelected && (
+                              <input type="radio" checked readOnly style={{ width: 18, height: 18, accentColor: '#8B5CF6', flexShrink: 0, marginTop: 3 }} />
+                            )}
+                            <div style={{ flex: 1 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: 14, fontWeight: 500, color: '#161616', fontFamily: 'Poppins, sans-serif' }}>{addr.address_label}</span>
+                                {isPreviouslyUsed && (
+                                  <span style={{ fontSize: 11, fontFamily: 'Inter, sans-serif', color: '#8B5CF6', background: '#F5F3FF', border: '1px solid #E7E1FF', borderRadius: 20, padding: '1px 8px', fontWeight: 500 }}>
+                                    Previously used
+                                  </span>
+                                )}
+                                {/* Edit icon */}
+                                <button
+                                  onClick={e => { e.stopPropagation(); setEditingAddress(addr); setShowAddressModal(true) }}
+                                  title="Edit address"
+                                  style={{ background: 'none', border: 'none', padding: '2px 4px', cursor: 'pointer', color: '#9CA3AF', display: 'inline-flex', alignItems: 'center', borderRadius: 6 }}
+                                >
+                                  <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                  </svg>
+                                </button>
+                                {/* Delete icon / inline confirm */}
+                                {confirmDeleteAddressId === addr.address_id ? (
+                                  <>
+                                    <button
+                                      onClick={e => { e.stopPropagation(); setConfirmDeleteAddressId(null) }}
+                                      style={{ fontSize: 12, padding: '2px 7px', borderRadius: 6, border: '1px solid #D1D5DB', background: '#fff', cursor: 'pointer', color: '#6B7280' }}
+                                    >
+                                      Cancel
+                                    </button>
+                                    <button
+                                      onClick={e => { e.stopPropagation(); handleDeleteAddress(addr.address_id) }}
+                                      disabled={deletingAddress}
+                                      style={{ fontSize: 12, padding: '2px 7px', borderRadius: 6, border: 'none', background: '#EF4444', color: '#fff', cursor: deletingAddress ? 'not-allowed' : 'pointer' }}
+                                    >
+                                      {deletingAddress ? '…' : 'Delete'}
+                                    </button>
+                                  </>
+                                ) : (
+                                  <button
+                                    onClick={e => { e.stopPropagation(); setConfirmDeleteAddressId(addr.address_id) }}
+                                    title="Delete address"
+                                    style={{ background: 'none', border: 'none', padding: '2px 4px', cursor: 'pointer', color: '#9CA3AF', display: 'inline-flex', alignItems: 'center', borderRadius: 6 }}
+                                  >
+                                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                  </button>
+                                )}
+                              </div>
+                              <div style={{ fontSize: 12, color: '#828282', fontFamily: 'Inter, sans-serif', lineHeight: 1.6 }}>
+                                {addr.street_address}{addr.landmark ? `, ${addr.landmark}` : ''}<br />
+                                {addr.city}, {addr.state} - {addr.postal_code}
+                              </div>
+                              {isSelected && (
+                                <div style={{ marginTop: 6 }}>
+                                  {serviceability.checking && (
+                                    <span style={{ fontSize: 12, color: '#828282', fontFamily: 'Inter, sans-serif' }}>Checking serviceability...</span>
+                                  )}
+                                  {!isGeneticCheckout && !serviceability.checking && serviceability.serviceable === true && (
+                                    <span style={{ fontSize: 12, color: '#059669', fontFamily: 'Inter, sans-serif', fontWeight: 500 }}>✓ Home collection available at this pincode</span>
+                                  )}
+                                  {isGeneticCheckout && (
+                                    <span style={{ fontSize: 12, color: '#059669', fontFamily: 'Inter, sans-serif', fontWeight: 500 }}>Home saliva kit collection selected</span>
+                                  )}
+                                  {!isGeneticCheckout && !serviceability.checking && serviceability.serviceable === false && (
+                                    <span style={{ fontSize: 12, color: '#DC2626', fontFamily: 'Inter, sans-serif', fontWeight: 500 }}>
+                                      ✗ Home collection not available at pincode {addr.postal_code}
+                                      {serviceability.message ? ` — ${serviceability.message}` : ''}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )
+              })}
+            </>
+          )}
+        </div>
+
+        <div className="checkout-summary" style={{ flex: '0 1 380px', width: '100%', maxWidth: 380, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {upsertError && (
+            <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 12, padding: '12px 16px', fontSize: 13, color: '#DC2626', fontFamily: 'Inter, sans-serif', lineHeight: 1.5 }}>
+              {upsertError}
+            </div>
+          )}
+
+          <OrderSummaryCard
+            itemCount={patientCount}
+            subtotal={displayTotal}
+            savings={0}
+            total={displayTotal}
+            onBack={() => {
+              trackGa4CustomEvent('bt_back_click', {
+                linkText: 'Back',
+                ...ga4CustomCartParams(items),
+                ...ga4CustomUserParams({ isLoggedIn, user, currentMember }),
+              })
+              navigate(checkoutPathFromLocation(location.pathname, 'cart'))
+            }}
+            onContinue={handleContinue}
+            continueDisabled={!canContinue || submitting}
+            continueLabel={submitting ? 'Saving...' : 'Continue'}
+            continueReasons={continueReasons}
+            collectionLabel={labels.collection}
+          />
+        </div>
+      </div>
+
+      {/* Add Member Modal — handled by shared AddMemberModal via AuthContext */}
+
+      {/* Gender Modal — handled inside AddMemberModal */}
+
+      <AddAddressModal
+        open={showAddressModal}
+        editingAddress={editingAddress}
+        onClose={() => { setShowAddressModal(false); setEditingAddress(null) }}
+        onSaved={saved => {
+          if (editingAddress) {
+            setAddresses(prev => prev.map(a => a.address_id === saved.address_id ? saved : a))
+            const pin = (saved.postal_code ?? '').replace(/\D/g, '').slice(0, 6)
+            if (pin.length === 6) {
+              const affectedPids = Object.entries(addressMap)
+                .filter(([, addrId]) => addrId === saved.address_id)
+                .map(([pid]) => Number(pid))
+              if (affectedPids.length > 0) {
+                setServiceabilityMap(prev => {
+                  const next = { ...prev }
+                  for (const pid of affectedPids) next[pid] = { checking: true, serviceable: null }
+                  return next
+                })
+                checkPincodeServiceability(pin).then(result => {
+                  setServiceabilityMap(prev => {
+                    const next = { ...prev }
+                    for (const pid of affectedPids) next[pid] = { checking: false, serviceable: result.serviceable, message: result.message }
+                    return next
+                  })
+                }).catch(() => {
+                  setServiceabilityMap(prev => {
+                    const next = { ...prev }
+                    for (const pid of affectedPids) next[pid] = { checking: false, serviceable: false, message: 'Could not verify pincode. Check your connection and try again.' }
+                    return next
+                  })
+                })
+              }
+            }
+          } else {
+            setAddresses(prev => [...prev, saved])
+          }
+          setEditingAddress(null)
+          setShowAddressModal(false)
+        }}
+      />
+    </div>
+  )
+}
