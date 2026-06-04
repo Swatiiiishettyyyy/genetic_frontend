@@ -1618,6 +1618,10 @@ a {
   gap: var(--genetic-stack-gap);
 }
 
+.genetic-mobile-discovery {
+  display: none;
+}
+
 .genetic-testing-page .genetic-card-grid,
 .genetic-testing-page .curated-package-grid,
 .genetic-testing-page .curated-bento-grid {
@@ -1653,12 +1657,34 @@ a {
 }
 
 .genetic-testing-page .genetic-hero-panel {
+  position: relative;
   min-height: 21rem;
+  background:
+    linear-gradient(90deg, rgba(17, 17, 45, 0.98) 0%, rgba(34, 35, 76, 0.92) 48%, rgba(42, 44, 91, 0.72) 100%),
+    #101129;
+  isolation: isolate;
 }
 
 .genetic-testing-page .genetic-hero-panel .type-hero-title,
 .genetic-testing-page .genetic-hero-panel .genetic-ribbon-copy {
   color: #ffffff;
+}
+
+.genetic-testing-page .genetic-hero-dna-layer {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  z-index: 0;
+  width: min(65%, 45rem);
+  height: 100%;
+  object-fit: cover;
+  object-position: center right;
+  opacity: 0.96;
+  pointer-events: none;
+}
+
+.genetic-testing-page .genetic-hero-mobile-art {
+  display: none;
 }
 
 .genetic-testing-page .genetic-hero-content {
@@ -1667,6 +1693,7 @@ a {
   gap: 1.55rem;
   height: 100%;
   justify-content: center;
+  max-width: min(56%, 35rem);
 }
 
 .genetic-testing-page .genetic-ribbon-copy-stack {
@@ -1684,6 +1711,99 @@ a {
   max-width: 50rem;
   font-size: var(--type-body);
   line-height: 1.48;
+}
+
+.genetic-testing-page .genetic-start-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(24rem, 1.08fr);
+  align-items: stretch;
+  gap: 1rem;
+  border: 0.0625rem solid rgba(203, 195, 215, 0.42);
+  border-radius: 0.88rem;
+  background: rgba(255, 255, 255, 0.86);
+  padding: 1rem;
+  box-shadow: 0 0.75rem 1.8rem rgba(75, 55, 130, 0.08);
+}
+
+.genetic-testing-page .genetic-start-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.45rem;
+  min-width: 0;
+  padding: 0.2rem 0.25rem;
+}
+
+.genetic-testing-page .genetic-start-copy .type-eyebrow {
+  color: #6b38d4;
+  text-transform: uppercase;
+}
+
+.genetic-testing-page .genetic-start-copy h2 {
+  max-width: 34rem;
+  color: #101129;
+  font-size: clamp(1rem, 0.9rem + 0.45vmin, 1.3rem);
+  font-weight: 600;
+  line-height: 1.32;
+}
+
+.genetic-testing-page .genetic-start-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.genetic-testing-page .genetic-start-choice {
+  display: flex;
+  min-height: 7.2rem;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.42rem;
+  border: 0.0625rem solid #e5ddfb;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  padding: 0.95rem;
+  text-align: left;
+  color: #494454;
+  transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+.genetic-testing-page .genetic-start-choice:hover {
+  border-color: rgba(107, 56, 212, 0.42);
+  box-shadow: 0 0.65rem 1.4rem rgba(75, 55, 130, 0.08);
+  transform: translateY(-0.0625rem);
+}
+
+.genetic-testing-page .genetic-start-choice--active {
+  border-color: #6b38d4;
+  background: linear-gradient(180deg, #ffffff 0%, #f5f0ff 100%);
+  box-shadow: 0 0.75rem 1.55rem rgba(107, 56, 212, 0.13);
+}
+
+.genetic-testing-page .genetic-start-badge {
+  border-radius: 999rem;
+  background: #f0e9ff;
+  padding: 0.28rem 0.62rem;
+  color: #6b38d4;
+  font-size: var(--type-eyebrow);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.genetic-testing-page .genetic-start-choice strong {
+  color: #101129;
+  font-size: var(--type-body-sm);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.genetic-testing-page .genetic-start-choice > span:last-child {
+  color: #6f687a;
+  font-size: var(--type-caption);
+  font-weight: 500;
+  line-height: 1.35;
 }
 
 .genetic-testing-page .genetic-hero-badges,
@@ -2242,6 +2362,11 @@ a {
 
   .genetic-testing-page .genetic-hero-content {
     justify-content: flex-start;
+    max-width: min(60%, 34rem);
+  }
+
+  .genetic-testing-page .genetic-start-panel {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .genetic-testing-page .genetic-card-grid {
@@ -2458,6 +2583,20 @@ a {
 
   .genetic-testing-page .genetic-hero-content {
     gap: 0.95rem;
+    max-width: 100%;
+  }
+
+  .genetic-testing-page .genetic-hero-panel {
+    min-height: 17.25rem;
+    background:
+      linear-gradient(90deg, rgba(16, 17, 41, 0.98) 0%, rgba(25, 26, 58, 0.88) 56%, rgba(42, 44, 91, 0.58) 100%),
+      #101129;
+  }
+
+  .genetic-testing-page .genetic-hero-dna-layer {
+    width: 86%;
+    opacity: 0.58;
+    object-position: 58% center;
   }
 
   .genetic-testing-page .genetic-ribbon-copy {
@@ -2494,6 +2633,28 @@ a {
     font-size: var(--type-eyebrow);
     line-height: 1.25;
     color: #818181;
+  }
+
+  .genetic-testing-page .genetic-start-panel {
+    gap: 0.78rem;
+    border-radius: 0.9rem;
+    padding: 0.82rem;
+  }
+
+  .genetic-testing-page .genetic-start-copy h2 {
+    font-size: 1rem;
+    line-height: 1.3;
+  }
+
+  .genetic-testing-page .genetic-start-actions {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.62rem;
+  }
+
+  .genetic-testing-page .genetic-start-choice {
+    min-height: 5.7rem;
+    border-radius: 0.75rem;
+    padding: 0.85rem;
   }
 
   .genetic-testing-page .sticky.top-\[5rem\] {
@@ -3562,6 +3723,333 @@ a {
     width: 2.375rem;
     height: 2.375rem;
     align-self: center;
+  }
+}
+
+@media (max-width: 48rem) {
+  .genetic-testing-page {
+    --type-hero: 1.42rem;
+    --type-section: 1.08rem;
+    --genetic-page-x: 12px;
+    --genetic-page-top: 0.85rem;
+    --genetic-stack-gap: 1rem;
+    background: #f8f6ff;
+  }
+
+  .genetic-testing-page .genetic-testing-main {
+    max-width: none;
+    padding: 1rem var(--genetic-page-x) 2.5rem !important;
+  }
+
+  .genetic-mobile-discovery {
+    display: flex;
+    flex-direction: column;
+    gap: 0.92rem;
+    width: 100%;
+    padding: 0.75rem 12px 0.85rem;
+    background: #ffffff;
+    box-sizing: border-box;
+  }
+
+  .genetic-mobile-location {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.35rem;
+    width: max-content;
+    min-height: 1.8rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #161616;
+    font-family: Inter, sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.7;
+    cursor: pointer;
+  }
+
+  .genetic-mobile-location svg {
+    flex: 0 0 auto;
+  }
+
+  .genetic-mobile-search {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 3.125rem;
+    border: 1px solid #e7e1ff;
+    border-radius: 153px;
+    background: #f9f9f9;
+    padding: 0 0.45rem 0 1rem;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .genetic-mobile-search input {
+    min-width: 0;
+    flex: 1;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #494454;
+    font-family: Poppins, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 400;
+    line-height: 1.7;
+  }
+
+  .genetic-mobile-search input::placeholder {
+    color: #b9b9b9;
+    opacity: 1;
+  }
+
+  .genetic-mobile-search button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 2.125rem;
+    height: 2.125rem;
+    margin-left: 0.45rem;
+    border: 0;
+    border-radius: 999px;
+    background: #e7e1ff;
+    color: #8b5cf6;
+    cursor: pointer;
+  }
+
+  .genetic-testing-page .genetic-shell-grid {
+    gap: 1rem;
+  }
+
+  .genetic-testing-page .genetic-content-stack {
+    gap: 1rem;
+  }
+
+  .genetic-testing-page .genetic-ribbon-panel {
+    border-radius: 16px;
+  }
+
+  .genetic-testing-page .genetic-hero-panel {
+    aspect-ratio: 364 / 204;
+    min-height: 0;
+    padding: 0 !important;
+    background: #101129;
+    box-shadow: 0 0.85rem 1.7rem rgba(16, 17, 41, 0.14);
+  }
+
+  .genetic-testing-page .genetic-hero-dna-layer {
+    display: none;
+  }
+
+  .genetic-testing-page .genetic-hero-mobile-art {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    object-fit: contain;
+    object-position: center;
+    background: #101129;
+  }
+
+  .genetic-testing-page .genetic-hero-content {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .genetic-testing-page .genetic-hero-panel .type-hero-title {
+    max-width: 15.5rem;
+    line-height: 1.16;
+  }
+
+  .genetic-testing-page .genetic-hero-panel .genetic-ribbon-copy {
+    max-width: 18.5rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.38;
+  }
+
+  .genetic-testing-page .genetic-start-panel {
+    margin-inline: -0.12rem;
+    padding: 0.78rem;
+  }
+
+  .genetic-testing-page .genetic-start-copy {
+    gap: 0.35rem;
+    padding: 0.1rem 0.1rem 0.2rem;
+  }
+
+  .genetic-testing-page .genetic-start-copy h2 {
+    font-size: 0.95rem;
+  }
+
+  .genetic-testing-page .genetic-start-choice {
+    min-height: 5.2rem;
+    gap: 0.32rem;
+    padding: 0.78rem;
+  }
+
+  .genetic-testing-page .genetic-start-badge {
+    padding: 0.24rem 0.55rem;
+  }
+
+  .genetic-testing-page .sticky.top-\[5rem\] {
+    margin-inline: -0.12rem;
+    border: 0.0625rem solid rgba(203, 195, 215, 0.38);
+    border-radius: 0.9rem;
+    background: rgba(255, 255, 255, 0.94);
+    padding: 0.3rem 0.62rem 0.72rem !important;
+    box-shadow: 0 0.75rem 1.6rem rgba(75, 55, 130, 0.08);
+  }
+
+  .genetic-testing-page .sticky.top-\[5rem\] > .type-caption {
+    min-height: 2.6rem;
+    gap: 0.9rem;
+    align-items: flex-end;
+    margin-inline: -0.62rem;
+    padding-inline: 0.62rem;
+  }
+
+  .genetic-testing-page .sticky.top-\[5rem\] > .type-caption button {
+    padding-bottom: 0.58rem;
+  }
+
+  .genetic-testing-page .sticky.top-\[5rem\] label {
+    height: 2.65rem;
+    border-radius: 999rem;
+    padding-inline: 0.9rem;
+  }
+
+  .genetic-testing-page .sticky.top-\[5rem\] label input {
+    min-width: 0;
+    font-size: 0.84rem;
+  }
+
+  .genetic-testing-page .sticky-category-chips,
+  .genetic-testing-page .package-filter-scroll {
+    margin-inline: -0.62rem;
+    padding-inline: 0.62rem;
+    scroll-padding-inline: 0.62rem;
+  }
+
+  .genetic-testing-page .sticky-category-chips {
+    gap: 0.55rem;
+    margin-block-start: 0.68rem;
+    padding-block-end: 0.2rem;
+  }
+
+  .genetic-testing-page .sticky-category-chips .type-chip,
+  .genetic-testing-page .package-filter-scroll .type-chip {
+    min-height: 2.15rem;
+    padding: 0.48rem 0.82rem;
+    white-space: nowrap;
+  }
+
+  .genetic-testing-page .curated-premium-card,
+  .genetic-testing-page .curated-premium-card--compact {
+    padding: 1.18rem 1rem 1rem !important;
+    border-radius: 0.9rem;
+    box-shadow: 0 0.85rem 1.6rem rgba(16, 17, 41, 0.14);
+  }
+
+  .genetic-testing-page .curated-premium-card .genetic-ribbon-copy-stack {
+    gap: 0.62rem;
+    padding-block-start: 0.25rem;
+  }
+
+  .genetic-testing-page .curated-premium-card .type-eyebrow {
+    max-width: calc(100% - 5.75rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .genetic-testing-page .curated-premium-card .genetic-ribbon-copy {
+    line-height: 1.35;
+  }
+
+  .genetic-testing-page .curated-premium-price-card {
+    grid-template-columns: minmax(4.75rem, 0.7fr) minmax(0, 1.3fr);
+    column-gap: 0.7rem;
+    padding-block-start: 0.8rem !important;
+  }
+
+  .genetic-testing-page .curated-premium-price-card .type-button {
+    min-height: 2.55rem;
+    padding-inline: 0.62rem;
+    font-size: 0.8rem;
+    white-space: normal;
+  }
+
+  .genetic-testing-page .genetic-section-block {
+    margin-block-start: 0;
+  }
+
+  .genetic-testing-page .genetic-card-grid,
+  .genetic-testing-page .curated-package-grid,
+  .genetic-testing-page .curated-bento-grid {
+    gap: 0.82rem;
+  }
+
+  .genetic-testing-page .genetic-category-card,
+  .genetic-testing-page .curated-package-card,
+  .genetic-testing-page .curated-bento-card {
+    border-radius: 0.9rem;
+    padding: 1rem !important;
+  }
+
+  .genetic-testing-page .curated-package-card {
+    padding-block-start: 1.35rem !important;
+  }
+
+  .genetic-testing-page .curated-card-actions {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .genetic-testing-page .curated-add-button {
+    width: 100%;
+    min-height: 2.55rem;
+  }
+
+  .genetic-testing-page .cart-aside-shell {
+    margin-block-start: 0.1rem;
+  }
+
+  .genetic-testing-page .cart-panel--empty,
+  .genetic-testing-page .cart-panel--selected {
+    width: 100%;
+    border-radius: 0.9rem;
+    padding: 1rem !important;
+    box-shadow: 0 0.85rem 1.8rem rgba(16, 17, 41, 0.12);
+  }
+
+  .genetic-testing-page .cart-mobile-empty-card {
+    min-height: auto;
+    gap: 0.85rem;
+  }
+
+  .genetic-testing-page .cart-mobile-empty-card .cart-checkout-button,
+  .genetic-testing-page .cart-panel--selected > .cart-checkout-button {
+    min-height: 2.55rem;
+    font-size: 0.9rem;
+  }
+
+  .genetic-testing-page .faq-section {
+    padding-block-start: 1rem;
+  }
+
+  .genetic-testing-page .faq-item {
+    min-height: 3.75rem;
+    border-radius: 0.9rem;
+    padding: 0.9rem 1rem;
   }
 }
 

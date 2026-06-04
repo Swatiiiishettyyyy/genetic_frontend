@@ -6,10 +6,9 @@ import { useAuth } from "../../../shared/auth/AuthContext";
 import { savePostLoginRedirect } from "../../../shared/auth/postLoginRedirect";
 import addIcon from "../assets/Genetics/material-symbols_add.svg";
 import filterIcon from "../assets/Genetics/mdi_filter-outline.svg";
+import geneticHeroMobile from "../assets/Genetics/genetic-mobile-banner.png";
+import geneticHeroDna from "../assets/Genetics/Untitled design (15) 1.png";
 import flaskIcon from "../assets/Genetics/Icon-1.svg";
-import wgsIcon from "../assets/Genetics/Icon-23.svg";
-import certifiedIcon from "../assets/Genetics/Icon-22.svg";
-import counselorIcon from "../assets/Genetics/Icon-18.svg";
 import cancerPulseIcon from "../assets/Genetics/Icon-15.svg";
 import hematologyIcon from "../assets/Genetics/Icon-13.svg";
 import neuroHeadIcon from "../assets/Genetics/Icon-18.svg";
@@ -34,21 +33,8 @@ import curatedChildIcon from "../assets/Genetics/curated-packages/material-symbo
 import curatedFamilyIcon from "../assets/Genetics/curated-packages/Icon-9.svg";
 import curatedHairIcon from "../assets/Genetics/curated-packages/streamline-ultimate_hair-skin-bold.svg";
 
-const trustBadges = [
-  { label: "WGS Technology", icon: wgsIcon },
-  { label: "CLIA Certified Lab", icon: certifiedIcon },
-  { label: "Secure Data Handling", icon: lockIcon },
-  { label: "Genetic Counsellor Support", icon: counselorIcon },
-];
-
-const stats = [
-  { value: "21", label: "Disease Categories" },
-  { value: "635+", label: "Genetic Insights" },
-  { value: "12-15", label: "Day Turnaround" },
-];
-
 const categories = ["All Categories", "Most Popular", "New Additions", "Cancer Risk"];
-const sectionTabs = ["Build Your Panel", "Curated Packages", "How It Works"];
+const sectionTabs = ["Curated Packages", "Build Your Panel"];
 const panelTabs = ["All Categories", "Most Popular", "Preventive Care", "Longevity", "Hormones", "Fitness", "Family Planning", "Mental Wellness"];
 const filterGroups = [
   {
@@ -550,38 +536,103 @@ function SearchIcon() {
   );
 }
 
+function MobileSearchBar() {
+  const handleSubmit = (event) => {
+    event.preventDefault();
+  };
+
+  return (
+    <div className="genetic-mobile-discovery" aria-label="Location and genetic test search">
+      <button type="button" className="genetic-mobile-location" aria-label="Choose location">
+        <svg width="20" height="20" viewBox="0 0 14 18" fill="none" aria-hidden="true">
+          <path
+            d="M7 0C3.69 0 1 2.69 1 6C1 10.5 7 17 7 17C7 17 13 10.5 13 6C13 2.69 10.31 0 7 0ZM7 8C5.9 8 5 7.1 5 6C5 4.9 5.9 4 7 4C8.1 4 9 4.9 9 6C9 7.1 8.1 8 7 8Z"
+            fill="#101129"
+          />
+        </svg>
+        <span>Location</span>
+        <svg width="10" height="10" viewBox="0 0 12 8" fill="none" aria-hidden="true">
+          <path d="M1 1L6 6L11 1" stroke="#161616" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+      </button>
+      <form className="genetic-mobile-search" onSubmit={handleSubmit}>
+        <input
+          type="search"
+          aria-label="Search genetic tests"
+          placeholder='Try "Cancer Risk", "Wellness Panel"'
+        />
+        <button type="submit" aria-label="Search genetic tests">
+          <SearchIcon />
+        </button>
+      </form>
+    </div>
+  );
+}
+
 function PackageIcon({ name }) {
   return <img src={name} alt="" className="h-4 w-4 object-contain" />;
 }
 
 function HeroSection() {
   return (
-    <section id="hero" className="genetic-ribbon-panel genetic-hero-panel overflow-hidden rounded-xl border border-[#cbc3d7]/30 bg-gradient-to-r from-nucleotide-night to-nucleotide-indigo p-[clamp(1.1rem,1.55vw,1.65rem)] text-white shadow-soft">
+    <section id="hero" className="genetic-ribbon-panel genetic-hero-panel overflow-hidden rounded-xl border border-[#cbc3d7]/30 text-white shadow-soft">
+      <img src={geneticHeroDna} alt="" className="genetic-hero-dna-layer" aria-hidden="true" />
+      <img src={geneticHeroMobile} alt="" className="genetic-hero-mobile-art" aria-hidden="true" />
       <div className="genetic-hero-content relative z-10">
         <div className="genetic-ribbon-copy-stack max-w-[50rem]">
           <h1 className="type-hero-title font-poppins">
-            Genomic Health <span className="text-nucleotide-purple">Intelligence</span>
+            Decode Your DNA.<br />
+            Unlock Your Future Health.
           </h1>
           <p className="genetic-ribbon-copy type-body font-inter max-w-[52rem] text-white/90">
-            Curate your personalized medical testing panel. Select from our advanced array of clinical-grade genomic screens to uncover predispositions, optimize longevity, and achieve peak performance.
+            Get clinically validated insights on disease risk, drug response, vitamin needs, and cognitive traits - powered by advanced genomics and AI.
           </p>
         </div>
-        <div className="genetic-hero-badges flex flex-wrap gap-2.5">
-          {trustBadges.map((badge) => (
-            <span key={badge.label} className="type-chip inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-[#15142f] to-[#2b2c59] px-3 py-1.5 text-white shadow-sm">
-              <img src={badge.icon} alt="" className="h-3 w-3 object-contain" />
-            {badge.label}
-            </span>
-          ))}
-        </div>
-        <div className="genetic-hero-stats grid gap-[clamp(0.85rem,1vw,1rem)] md:grid-cols-3">
-          {stats.map((stat) => (
-            <div key={stat.label} className="rounded-xl border border-[#2a2c58] bg-white/[0.02] p-3 text-center backdrop-blur-md">
-              <p className="type-price">{stat.value}</p>
-              <p className="type-eyebrow mt-1 text-[#818181]">{stat.label}</p>
-            </div>
-          ))}
-        </div>
+      </div>
+    </section>
+  );
+}
+
+function StartChoicePanel({ activeSectionTab, onSectionTabChange }) {
+  const choices = [
+    {
+      tab: "Curated Packages",
+      title: "Choose a Curated Package",
+      text: "Expert-designed bundles for common health goals.",
+      badge: "Recommended start",
+    },
+    {
+      tab: "Build Your Panel",
+      title: "Build My Own Panel",
+      text: "Select specific genes, conditions, or markers.",
+      badge: "Custom path",
+    },
+  ];
+
+  return (
+    <section className="genetic-start-panel" aria-labelledby="genetic-start-title">
+      <div className="genetic-start-copy">
+        <p className="type-eyebrow">Not sure where to start?</p>
+        <h2 id="genetic-start-title">Start with a recommended package or build your own genetic test panel.</h2>
+      </div>
+      <div className="genetic-start-actions" role="group" aria-label="Choose how to start genetic testing">
+        {choices.map((choice) => {
+          const isActive = activeSectionTab === choice.tab;
+
+          return (
+            <button
+              key={choice.tab}
+              type="button"
+              aria-pressed={isActive}
+              onClick={() => onSectionTabChange(choice.tab)}
+              className={isActive ? "genetic-start-choice genetic-start-choice--active" : "genetic-start-choice"}
+            >
+              <span className="genetic-start-badge">{choice.badge}</span>
+              <strong>{choice.title}</strong>
+              <span>{choice.text}</span>
+            </button>
+          );
+        })}
       </div>
     </section>
   );
@@ -1438,7 +1489,7 @@ export function GeneticTestingPage({ onMenuClick }) {
   }, [authReady, isLoggedIn, pendingPanel]);
 
   return (
-    <div className="genetic-testing-page min-h-screen overflow-hidden bg-white font-poppins text-nucleotide-ink">
+    <div className="genetic-testing-page min-h-screen overflow-x-hidden bg-white font-poppins text-nucleotide-ink">
       <Navbar
         logoSrc="/favicon.svg"
         logoAlt="Nucleotide"
@@ -1447,10 +1498,15 @@ export function GeneticTestingPage({ onMenuClick }) {
         onCtaClick={handleCartClick}
         activeHrefOverride="/genetics"
       />
+      <MobileSearchBar />
       <main className="genetic-testing-main relative mx-auto w-full max-w-[110rem] px-[clamp(1rem,2.6vw,3rem)] pb-[clamp(4rem,6vw,5.5rem)] pt-[clamp(1.35rem,2.35vw,2.8rem)]">
         <div className="genetic-shell-grid relative grid gap-[clamp(1.25rem,1.8vw,2rem)] xl:grid-cols-[minmax(0,1fr)_minmax(18rem,21rem)] xl:items-start">
           <div className="genetic-content-stack min-w-0">
             <HeroSection />
+            <StartChoicePanel
+              activeSectionTab={activeSectionTab}
+              onSectionTabChange={setActiveSectionTab}
+            />
             <StickyControls
               activeSectionTab={activeSectionTab}
               onSectionTabChange={setActiveSectionTab}
