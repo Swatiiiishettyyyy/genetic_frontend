@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "../../bloodtest/components/Navbar/Navbar";
@@ -32,9 +32,13 @@ import curatedSportsIcon from "../assets/Genetics/curated-packages/Icon-11.svg";
 import curatedChildIcon from "../assets/Genetics/curated-packages/material-symbols_sports-handball.svg";
 import curatedFamilyIcon from "../assets/Genetics/curated-packages/Icon-9.svg";
 import curatedHairIcon from "../assets/Genetics/curated-packages/streamline-ultimate_hair-skin-bold.svg";
+import badgeCertifiedIcon from "../assets/Genetics/Vector (1).svg";
+import badgeReportIcon from "../assets/Genetics/Vector (2).svg";
+import badgeVerifiedIcon from "../assets/Genetics/Icon-6.svg";
+import badgeSecureIcon from "../assets/Genetics/Icon-11.svg";
 
 const categories = ["All Categories", "Most Popular", "New Additions", "Cancer Risk"];
-const sectionTabs = ["Curated Packages", "Build Your Panel"];
+const sectionTabs = ["Build Your Panel", "Curated Packages", "How It Works"];
 const panelTabs = ["All Categories", "Most Popular", "Preventive Care", "Longevity", "Hormones", "Fitness", "Family Planning", "Mental Wellness"];
 const filterGroups = [
   {
@@ -78,68 +82,87 @@ function getFilterGroupLabel(tab) {
 const categoryCards = [
   {
     title: "Cancer Risk",
-    text: "Identify risks for hereditary conditions and major health events.",
+    text: "Understand your inherited cancer risks and take proactive steps toward prevention.",
     price: "₹6,999",
-    tag: "Popular",
+    tag: "Preventive Care",
     icon: cancerPulseIcon,
     tone: "rose",
+    overlayBadge: { label: "Most Chosen", variant: "chosen" },
   },
   {
-    title: "Hematology",
-    text: "Deep dive into blood-related traits and genetic conditions.",
+    title: "Heart Health",
+    text: "Assess your genetic risk for heart disease, cholesterol traits, and blood pressure pathways.",
     price: "₹6,999",
-    tag: "Blood Health",
-    icon: hematologyIcon,
+    tag: "Preventive Care",
+    icon: cardioMonitorIcon,
+    tone: "rose",
+    overlayBadge: null,
+  },
+  {
+    title: "Carrier Screening",
+    text: "Identify genetic conditions you can pass on to your children before starting a family.",
+    price: "₹6,999",
+    tag: "Family Planning",
+    icon: familyIcon,
     tone: "sea",
+    overlayBadge: null,
+  },
+  {
+    title: "Diabetes Risk",
+    text: "Know your genetic risk for type 2 diabetes and metabolic conditions.",
+    price: "₹6,999",
+    tag: "Preventive Care",
+    icon: metabolicIcon,
+    tone: "blue",
+    overlayBadge: null,
   },
   {
     title: "Hormone Health",
-    text: "Comprehensive analysis of hormone production and receptor sensitivity.",
+    text: "Understand your hormone balance better with a comprehensive endocrine analysis.",
     price: "₹6,999",
-    tag: "Endocrine",
+    tag: "Hormones",
     icon: "hormone-drop",
     tone: "purple",
+    overlayBadge: { label: "Beginner Friendly", variant: "beginner" },
   },
   {
-    title: "Neuropsychiatry",
-    text: "Genetic factors influencing mental wellness and behavioral health.",
+    title: "Fitness Potential",
+    text: "Uncover your body's fitness strengths, recovery traits, and athletic predispositions.",
     price: "₹6,999",
-    tag: "Mental Health",
+    tag: "Fitness",
+    icon: wellnessIcon,
+    tone: "sea",
+    overlayBadge: null,
+  },
+  {
+    title: "Mental Wellness",
+    text: "Genetic factors influencing mental wellness, mood pathways, and stress response.",
+    price: "₹6,999",
+    tag: "Mental Wellness",
     icon: neuroHeadIcon,
     tone: "blue",
+    overlayBadge: null,
   },
   {
-    title: "Cardio Health",
-    text: "Cardiovascular risks, cholesterol traits, and blood pressure pathways.",
+    title: "Pharmacogenomics",
+    text: "How your genes affect medicine response and drug metabolism pathways.",
     price: "₹6,999",
-    tag: "Heart",
-    icon: cardioMonitorIcon,
+    tag: "Medication",
+    icon: hematologyIcon,
     tone: "rose",
+    overlayBadge: null,
   },
-  {
-    title: "Neurology",
-    text: "Alzheimer's risk, cognitive traits, and neurodegenerative markers.",
-    price: "₹6,999",
-    tag: "Brain",
-    icon: brainIcon,
-    tone: "blue",
-  },
-  {
-    title: "Metabolic Care",
-    text: "Insulin sensitivity, nutrient processing, and metabolic efficiency.",
-    price: "₹6,999",
-    tag: "Metabolic",
-    icon: metabolicIcon,
-    tone: "sea",
-  },
-  {
-    title: "Reproductive & Fertility",
-    text: "Determine if you carry genetic variants for inherited conditions.",
-    price: "₹6,999",
-    tag: "Family",
-    icon: familyIcon,
-    tone: "purple",
-  },
+];
+
+const popularCategories = [
+  { title: "Cancer Risk",        stat: "52,000+ tests", tag: "Most Chosen",       tagVariant: "chosen",  tone: "rose",   rank: 1 },
+  { title: "Heart Health",       stat: "38,400+ tests", tag: "Cardiologist Pick", tagVariant: "rose",    tone: "rose",   rank: 2 },
+  { title: "Diabetes Risk",      stat: "29,100+ tests", tag: "Preventive",        tagVariant: "blue",    tone: "blue",   rank: 3 },
+  { title: "Hormone Health",     stat: "24,500+ tests", tag: "Beginner Friendly", tagVariant: "purple",  tone: "purple", rank: 4 },
+  { title: "Fitness Potential",  stat: "18,700+ tests", tag: "Performance",       tagVariant: "sea",     tone: "sea",    rank: 5 },
+  { title: "Mental Wellness",    stat: "15,200+ tests", tag: "Trending",          tagVariant: "blue",    tone: "blue",   rank: 6 },
+  { title: "Fertility & Family", stat: "12,900+ tests", tag: "Family Care",       tagVariant: "sea",     tone: "sea",    rank: 7 },
+  { title: "Pharmacogenomics",   stat: "9,600+ tests",  tag: "Precision Med",     tagVariant: "purple",  tone: "purple", rank: 8 },
 ];
 
 const sharedIncludedItems = [
@@ -377,18 +400,96 @@ const panelDetails = {
   },
 };
 
-const recommendedPanels = [
+const trendingTests = [
   {
-    title: "Comprehensive Cancer Risk",
-    text: "Analyses 84 genes associated with elevated risk for breast, ovarian, colorectal, and other hereditary cancers.",
-    price: "₹249",
-    saving: "View 84 Conditions",
+    title: "Cancer Risk Panel",
+    text: "Identify hereditary cancer risks across 54 conditions with BRCA1/2 screening.",
+    price: "₹6,999",
+    originalPrice: "₹9,999",
+    discount: "30% Off",
+    reportsIn: "15 days",
+    testsCount: "54 conditions",
+    icon: cancerPulseIcon,
+    tone: "rose",
+    overlayBadge: { label: "Most Chosen", variant: "chosen" },
   },
   {
-    title: "Cardiac Risk Profile",
-    text: "Evaluates genetic markers linked to familial hypercholesterolemia, cardiomyopathies, and arrhythmias.",
-    price: "₹199",
-    saving: "View 32 Conditions",
+    title: "Thyroid & Hormone",
+    text: "Full endocrine panel — thyroid, cortisol, PCOS markers, and vitamin D metabolism.",
+    price: "₹5,499",
+    originalPrice: "₹7,999",
+    discount: "31% Off",
+    reportsIn: "12 days",
+    testsCount: "42 conditions",
+    icon: metabolicIcon,
+    tone: "purple",
+    overlayBadge: { label: "Beginner Friendly", variant: "beginner" },
+  },
+  {
+    title: "Heart Health",
+    text: "Genetic cardiovascular screen covering cholesterol traits, arrhythmia, and cardiomyopathy.",
+    price: "₹5,999",
+    originalPrice: "₹8,499",
+    discount: "29% Off",
+    reportsIn: "15 days",
+    testsCount: "32 conditions",
+    icon: cardioMonitorIcon,
+    tone: "rose",
+    overlayBadge: null,
+  },
+  {
+    title: "Pharmacogenomics",
+    text: "Discover how your DNA affects drug metabolism so doctors can prescribe with precision.",
+    price: "₹7,499",
+    originalPrice: "₹10,999",
+    discount: "31% Off",
+    reportsIn: "15 days",
+    testsCount: "48 conditions",
+    icon: hematologyIcon,
+    tone: "blue",
+    overlayBadge: null,
+  },
+];
+
+const recommendedPanels = [
+  {
+    title: "Whole Health Essentials",
+    text: "All-in-one preventive health insights across the most critical genetic categories.",
+    price: "₹9,999",
+    originalPrice: "₹12,999",
+    saving: "₹3,000",
+    markers: "80+ markers",
+    icon: wellnessIcon,
+    tone: "purple",
+    categories: ["Cancer Risk", "Cardiac", "Metabolic"],
+    badge: "Most Popular",
+    badgeColor: "badge--popular",
+  },
+  {
+    title: "Advanced Heart Care",
+    text: "Deep cardiovascular insights — cholesterol, arrhythmia, cardiomyopathy, and more.",
+    price: "₹7,999",
+    originalPrice: "₹10,999",
+    saving: "₹3,000",
+    markers: "32+ markers",
+    icon: cardioMonitorIcon,
+    tone: "rose",
+    categories: ["Cardiac", "Lipid", "Blood Pressure"],
+    badge: "Cardiologist Pick",
+    badgeColor: "badge--rose",
+  },
+  {
+    title: "Family Wealth Plus",
+    text: "Comprehensive genomic insights for you and your family across key health categories.",
+    price: "₹11,999",
+    originalPrice: "₹15,999",
+    saving: "₹4,000",
+    markers: "60+ markers",
+    icon: familyIcon,
+    tone: "sea",
+    categories: ["Carrier Screening", "Fertility", "Hormones"],
+    badge: "Family Choice",
+    badgeColor: "badge--teal",
   },
 ];
 
@@ -573,23 +674,42 @@ function PackageIcon({ name }) {
   return <img src={name} alt="" className="h-4 w-4 object-contain" />;
 }
 
+const heroBadges = [
+  { icon: badgeCertifiedIcon, label: "CAP & NABL Certified Labs", color: "hero-badge--amber" },
+  { icon: badgeVerifiedIcon,  label: "Free One Time Blood Collection", color: "hero-badge--green" },
+  { icon: badgeReportIcon,    label: "Interactive Reports", color: "hero-badge--teal" },
+  { icon: badgeSecureIcon,    label: "Secure & Private Data", color: "hero-badge--blue" },
+];
+
 function HeroSection() {
   return (
-    <section id="hero" className="genetic-ribbon-panel genetic-hero-panel overflow-hidden rounded-xl border border-[#cbc3d7]/30 text-white shadow-soft">
-      <img src={geneticHeroDna} alt="" className="genetic-hero-dna-layer" aria-hidden="true" />
-      <img src={geneticHeroMobile} alt="" className="genetic-hero-mobile-art" aria-hidden="true" />
-      <div className="genetic-hero-content relative z-10">
-        <div className="genetic-ribbon-copy-stack max-w-[50rem]">
-          <h1 className="type-hero-title font-poppins">
-            Decode Your DNA.<br />
-            Unlock Your Future Health.
-          </h1>
-          <p className="genetic-ribbon-copy type-body font-inter max-w-[52rem] text-white/90">
-            Get clinically validated insights on disease risk, drug response, vitamin needs, and cognitive traits - powered by advanced genomics and AI.
-          </p>
+    <div className="genetic-hero-wrapper">
+      <section id="hero" className="genetic-ribbon-panel genetic-hero-panel overflow-hidden rounded-xl border border-[#cbc3d7]/30 text-white shadow-soft">
+        <img src={geneticHeroDna} alt="" className="genetic-hero-dna-layer" aria-hidden="true" />
+        <img src={geneticHeroMobile} alt="" className="genetic-hero-mobile-art" aria-hidden="true" />
+        <div className="genetic-hero-content relative z-10">
+          <div className="genetic-ribbon-copy-stack max-w-[50rem]">
+            <h1 className="type-hero-title font-poppins">
+              Decode Your DNA.<br />
+              Unlock Your Future Health.
+            </h1>
+            <p className="genetic-ribbon-copy type-body font-inter max-w-[52rem] text-white/90">
+              Get clinically validated insights on disease risk, drug response, vitamin needs, and cognitive traits - powered by advanced genomics and AI.
+            </p>
+          </div>
         </div>
+      </section>
+      <div className="genetic-hero-trust-row" aria-label="Trust indicators">
+        {heroBadges.map((badge) => (
+          <div key={badge.label} className={`hero-badge ${badge.color}`}>
+            <span className="hero-badge-icon-wrap">
+              <img src={badge.icon} alt="" aria-hidden="true" />
+            </span>
+            <span className="hero-badge-label">{badge.label}</span>
+          </div>
+        ))}
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -706,6 +826,36 @@ function StickyControls({ activeSectionTab, onSectionTabChange, showBuildFilters
   );
 }
 
+function MobileBuildPanelControls() {
+  const [activeCategory, setActiveCategory] = useState(categories[0]);
+
+  return (
+    <div className="genetic-mobile-panel-controls" aria-label="Build panel search and filters">
+      <label className="genetic-mobile-panel-search">
+        <SearchIcon />
+        <input type="search" placeholder="Search conditions, genes, or panels..." />
+      </label>
+      <div className="genetic-mobile-panel-chips" aria-label="Panel categories">
+        {categories.map((category) => {
+          const isActive = activeCategory === category;
+
+          return (
+            <button
+              key={category}
+              type="button"
+              aria-pressed={isActive}
+              onClick={() => setActiveCategory(category)}
+              className={isActive ? "genetic-mobile-panel-chip genetic-mobile-panel-chip--active" : "genetic-mobile-panel-chip"}
+            >
+              {category}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function FeaturedPanel({ compact = false, onAddPanel }) {
   return (
     <section className={compact ? "genetic-ribbon-panel curated-premium-card curated-premium-card--compact" : "genetic-ribbon-panel curated-premium-card"}>
@@ -753,26 +903,190 @@ function FeaturedPanel({ compact = false, onAddPanel }) {
   );
 }
 
-function CategoryCard({ card, onOpen }) {
+function StarIcon() {
   return (
-    <button
-      type="button"
-      onClick={() => onOpen(card)}
-      className="genetic-category-card group flex min-h-[9rem] flex-col rounded-xl border border-nucleotide-lavender/80 bg-gradient-to-b from-white to-nucleotide-lavender p-[clamp(0.9rem,1vw,1.1rem)] text-left shadow-soft transition duration-200 hover:-translate-y-1 hover:shadow-[0_1.25rem_3rem_rgba(139,92,246,0.18)]"
-    >
-      <div className="flex items-start justify-between gap-4">
-        <span className={`grid h-5 min-w-9 place-items-center rounded-full genetic-tone-${card.tone}`}>
-          <CardIcon icon={card.icon} />
+    <svg viewBox="0 0 12 12" width="10" height="10" fill="currentColor" aria-hidden="true">
+      <path d="M6 1l1.18 2.39 2.64.38-1.91 1.86.45 2.63L6 7.01 3.64 8.26l.45-2.63L2.18 3.77l2.64-.38L6 1z" />
+    </svg>
+  );
+}
+
+function LeafIcon() {
+  return (
+    <svg viewBox="0 0 12 12" width="10" height="10" fill="currentColor" aria-hidden="true">
+      <path d="M2.5 10.5c1-3 3.5-5.5 7-6.5C9 7.5 6.5 10 2.5 10.5z" />
+      <path d="M2.5 10.5C3 8 4 6.5 6 5" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" fill="none" />
+    </svg>
+  );
+}
+
+/* ── Most Popular Categories — Icon Set ───────────────────── */
+function TrendingFireIcon() {
+  return (
+    <svg viewBox="0 0 14 14" width="13" height="13" fill="currentColor" aria-hidden="true">
+      <path d="M7 1.5C7 1.5 4 5.2 4 8.3a3 3 0 0 0 6 0c0-1.3-.5-2.7-1.4-3.8C8.6 6 7.8 6.5 7.8 7.8A1.5 1.5 0 0 1 5.2 7.8C5.2 5.8 6.5 3.3 7 1.5Z" />
+    </svg>
+  );
+}
+
+function CrownIcon() {
+  return (
+    <svg viewBox="0 0 12 12" width="11" height="11" fill="currentColor" aria-hidden="true">
+      <path d="M1 9.5h10M1.5 9.5l1-5 2.5 3L6 4.5 7 7.5l2.5-3 1 5H1.5Z" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ChevronLeftIcon() {
+  return (
+    <svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 4L6 9l6 5" />
+    </svg>
+  );
+}
+
+function ChevronRightIcon() {
+  return (
+    <svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M6 4l6 5-6 5" />
+    </svg>
+  );
+}
+
+function PopcatCancerRiskIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M8 3C9 5.5 11 5.5 12 3" />
+      <path d="M8 21C9 18.5 11 18.5 12 21" />
+      <path d="M8 3C7 5.5 5 5.5 4 3" />
+      <path d="M8 21C7 18.5 5 18.5 4 21" />
+      <line x1="5.5" y1="8" x2="10.5" y2="8" />
+      <line x1="5" y1="12" x2="11" y2="12" />
+      <line x1="5.5" y1="16" x2="10.5" y2="16" />
+      <path d="M8 3V21M12 3V21" opacity="0.35" strokeWidth="0.8" />
+      <circle cx="18" cy="17" r="3.5" />
+      <line x1="20.5" y1="19.5" x2="23" y2="22" />
+    </svg>
+  );
+}
+
+function PopcatHeartHealthIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 21C12 21 3.5 14.5 3.5 9A5 5 0 0 1 12 6a5 5 0 0 1 8.5 3C20.5 14.5 12 21 12 21Z" />
+      <path d="M4.5 12H7l2-3 2.5 6 2-3.5 1.5 1.5H19.5" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+function PopcatDiabetesRiskIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 3C12 3 6.5 10.5 6.5 15a5.5 5.5 0 0 0 11 0C17.5 10.5 12 3 12 3Z" />
+      <circle cx="12" cy="15" r="2.5" />
+      <line x1="12" y1="12.5" x2="12" y2="11" />
+      <line x1="19" y1="5" x2="22" y2="5" />
+      <line x1="20.5" y1="3.5" x2="20.5" y2="6.5" />
+    </svg>
+  );
+}
+
+function PopcatHormoneHealthIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9 3h6M10 3v5L6 19h12L14 8V3" />
+      <circle cx="9.5" cy="14" r="1.2" />
+      <circle cx="12" cy="11" r="1.2" />
+      <circle cx="14.5" cy="14" r="1.2" />
+      <line x1="9.5" y1="14" x2="12" y2="11" />
+      <line x1="12" y1="11" x2="14.5" y2="14" />
+    </svg>
+  );
+}
+
+function PopcatFitnessIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M14 2L6 13h5l-1 9 8-11h-5L14 2Z" />
+    </svg>
+  );
+}
+
+function PopcatMentalWellnessIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 6C8 6 5 8.5 5 11.5c0 2 1.5 3.5 3 4L8 18h8l-.5-2.5C17 14.5 19 13 19 11.5 19 8.5 16 6 12 6Z" />
+      <line x1="12" y1="6" x2="12" y2="18" strokeWidth="0.8" opacity="0.4" />
+      <path d="M7 11.5C8 10 9 12.5 10 11.5C11 10 11.5 12.5 12 11.5" strokeWidth="1.4" />
+      <path d="M12 11.5C12.5 10 13 12.5 14 11.5C15 10 16 12.5 17 11.5" strokeWidth="1.4" />
+    </svg>
+  );
+}
+
+function PopcatFertilityIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 4C5 7 7 7 8 10C9 13 7 13 8 16" />
+      <path d="M6 4C7 7 5 7 6 10C7 13 9 13 8 16" />
+      <line x1="4.8" y1="7" x2="7.2" y2="7" />
+      <line x1="5" y1="10" x2="7.5" y2="10" />
+      <line x1="4.8" y1="13" x2="7.2" y2="13" />
+      <circle cx="16" cy="8" r="2" />
+      <line x1="16" y1="10" x2="16" y2="14" />
+      <line x1="13.5" y1="12" x2="18.5" y2="12" />
+      <line x1="16" y1="14" x2="14" y2="18" />
+      <line x1="16" y1="14" x2="18" y2="18" />
+    </svg>
+  );
+}
+
+function PopcatPharmaIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="7" y="7" width="10" height="7" rx="3.5" />
+      <line x1="12" y1="7" x2="12" y2="14" />
+      <path d="M5 18C6 17 7 19 8 18C9 17 10 19 11 18" strokeWidth="1.4" />
+      <path d="M5 20C6 19 7 21 8 20C9 19 10 21 11 20" strokeWidth="1.4" />
+      <line x1="7" y1="18.2" x2="7" y2="19.8" strokeWidth="1.2" />
+      <line x1="9" y1="17.8" x2="9" y2="20.2" strokeWidth="1.2" />
+      <line x1="11" y1="18.2" x2="11" y2="19.8" strokeWidth="1.2" />
+    </svg>
+  );
+}
+
+function GeneticTestCard({ card, onOpen, onAddPanel }) {
+  return (
+    <article className="gen-test-card" onClick={() => onOpen(card)} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && onOpen(card)}>
+      {card.overlayBadge && (
+        <span className={`gen-card-overlay-badge gen-card-overlay-badge--${card.overlayBadge.variant}`}>
+          {card.overlayBadge.variant === "chosen" ? <StarIcon /> : <LeafIcon />}
+          {card.overlayBadge.label}
         </span>
-        <span className="h-4 w-4 rounded-full border border-nucleotide-purple/60 bg-white" aria-hidden="true" />
+      )}
+      <div className="gen-card-inner-top">
+        <div className="gen-card-top-row">
+          <span className={`gen-card-icon-circle genetic-tone-${card.tone}`}>
+            <CardIcon icon={card.icon} />
+          </span>
+          <span className="gen-card-tag-pill">{card.tag}</span>
+        </div>
+        <h3 className="gen-card-title">{card.title}</h3>
       </div>
-      <h3 className="type-card-title mt-2 text-nucleotide-ink">{card.title}</h3>
-      <p className="type-body-sm mt-1.5 flex-1 text-[#494454]">{card.text}</p>
-      <div className="mt-3 flex items-end justify-between gap-3">
-        <p className="type-price text-nucleotide-ink">{card.price}</p>
-        <p className="type-caption text-nucleotide-purple">{card.tag}</p>
+      <p className="gen-card-description">{card.text}</p>
+      <div className="gen-card-divider" aria-hidden="true" />
+      <div className="gen-card-footer">
+        <p className="gen-card-price">{card.price}</p>
+        <button
+          type="button"
+          className="gen-panel-cta"
+          onClick={(e) => { e.stopPropagation(); onAddPanel?.(card); }}
+          aria-label={`Add ${card.title} panel`}
+        >
+          <img src={addIcon} alt="" aria-hidden="true" />
+          Add Panel
+        </button>
       </div>
-    </button>
+    </article>
   );
 }
 
@@ -1163,34 +1477,157 @@ function CuratedPackagesView({ onAddPanel }) {
   );
 }
 
-function RecommendedPanel({ panel, icon, showBadge = false }) {
+function TrendingCard({ card, onOpen, onAddPanel }) {
   return (
-    <article className="curated-package-card">
-      {showBadge && (
-        <span className="curated-card-badge bg-nucleotide-purple text-white curated-card-badge--abs">
-          Best Value
+    <article className="tcard">
+      {/* Header area — coloured gradient bg with icon + title + discount */}
+      <div className={`tcard-head tcard-head--${card.tone}`}>
+        <div className="tcard-head-top">
+          <span className={`tcard-icon genetic-tone-${card.tone}`}>
+            <CardIcon icon={card.icon} />
+          </span>
+          {card.overlayBadge && (
+            <span className={`tcard-badge tcard-badge--${card.overlayBadge.variant}`}>
+              {card.overlayBadge.variant === "chosen" ? <StarIcon /> : <LeafIcon />}
+              {card.overlayBadge.label}
+            </span>
+          )}
+        </div>
+        <h3 className="tcard-title">{card.title}</h3>
+        <p className="tcard-desc">{card.text}</p>
+      </div>
+
+      {/* Meta row */}
+      <div className="tcard-meta">
+        <span className="tcard-meta-item">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+            <circle cx="8" cy="8" r="6" /><path d="M8 5v3.5l2 1.5" />
+          </svg>
+          <span>Reports within <strong>{card.reportsIn}</strong></span>
         </span>
-      )}
-      <div className="curated-card-header">
-        <span className="curated-icon-tile curated-tone-purple">
-          <img src={icon} alt="" className="h-5 w-5" />
+        <span className="tcard-meta-sep" aria-hidden="true" />
+        <span className="tcard-meta-item">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M3 4h10M3 8h7M3 12h5" />
+          </svg>
+          <span><strong>{card.testsCount}</strong> included</span>
         </span>
       </div>
-      <div className="curated-card-copy-stack">
-        <h3 className="curated-card-title">{panel.title}</h3>
-        <p className="curated-card-description">{panel.text}</p>
-        <a href="#conditions" className="curated-condition-link">{panel.saving}</a>
-      </div>
-      <div className="curated-card-footer">
-        <div className="curated-card-actions">
-          <div className="curated-price-group">
-            <p className="curated-current-price">{panel.price}</p>
-            <p className="curated-saving">HSA/FSA Eligible</p>
+
+      {/* Divider */}
+      <div className="tcard-divider" aria-hidden="true" />
+
+      {/* Footer — price + two buttons */}
+      <div className="tcard-footer">
+        <div className="tcard-price-block">
+          <span className="tcard-original">{card.originalPrice}</span>
+          <div className="tcard-price-row">
+            <span className="tcard-price">{card.price}</span>
+            <span className="tcard-discount">{card.discount}</span>
           </div>
-          <button className="curated-add-button">
-            <img src={addIcon} alt="" className="w-4" /> Add to Panel
+        </div>
+        <div className="tcard-actions">
+          <button type="button" className="tcard-btn-outline" onClick={() => onOpen(card)}>
+            View Details
+          </button>
+          <button type="button" className="tcard-btn-fill" onClick={() => onAddPanel(card)}>
+            + Add to Cart
           </button>
         </div>
+      </div>
+    </article>
+  );
+}
+
+function TrendingTestsSection({ onOpen, onAddPanel }) {
+  const items = trendingTests;
+  const [index, setIndex] = useState(0);
+
+  const prev = () => setIndex((i) => (i === 0 ? items.length - 1 : i - 1));
+  const next = () => setIndex((i) => (i === items.length - 1 ? 0 : i + 1));
+
+  useEffect(() => {
+    const t = setInterval(next, 4200);
+    return () => clearInterval(t);
+  }, [index]);
+
+  return (
+    <section className="trending-tests-section genetic-section-block">
+      <div className="gen-section-header gen-section-header--centered build-panel-section-head">
+        <div className="gen-section-heading-group">
+          <h2 className="type-section-title">Trending Tests</h2>
+          <p className="gen-section-subtitle">Most booked genetic panels this month.</p>
+        </div>
+      </div>
+
+      {/* Mobile single-card carousel */}
+      <div className="trending-carousel-mobile">
+        <TrendingCard card={items[index]} onOpen={onOpen} onAddPanel={onAddPanel} />
+        <div className="trending-dots">
+          {items.map((_, i) => (
+            <button
+              key={i}
+              className={`popcats-oh-dot${i === index ? " popcats-oh-dot--active" : ""}`}
+              onClick={() => setIndex(i)}
+              type="button"
+              aria-label={`Go to ${items[i].title}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop 4-col grid */}
+      <div className="trending-grid-desktop">
+        {items.map((card) => (
+          <TrendingCard key={card.title} card={card} onOpen={onOpen} onAddPanel={onAddPanel} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function RecommendedPanelCard({ panel, onAddPanel }) {
+  return (
+    <article className="gen-panel-card">
+      <div className="gen-panel-inner-top">
+        {/* Icon left, badge right */}
+        <div className="gen-panel-top-row">
+          <span className={`gen-panel-icon-circle genetic-tone-${panel.tone}`}>
+            <img src={panel.icon} alt="" />
+          </span>
+          <span className={`gen-panel-badge-pill ${panel.badgeColor}`}>
+            {panel.badge}
+          </span>
+        </div>
+        {/* Title then description directly below */}
+        <h3 className="gen-panel-title">{panel.title}</h3>
+        <p className="gen-panel-description">{panel.text}</p>
+      </div>
+      <div className="gen-panel-body">
+        {/* Markers count */}
+        <span className="gen-panel-markers">{panel.markers}</span>
+        {/* Category chips below markers */}
+        <div className="gen-panel-chips">
+          {panel.categories.map((cat) => (
+            <span key={cat} className="gen-panel-chip">{cat}</span>
+          ))}
+        </div>
+      </div>
+      <div className="gen-card-divider" aria-hidden="true" />
+      <div className="gen-panel-footer">
+        <div className="gen-panel-price-stack">
+          <span className="gen-panel-original">{panel.originalPrice}</span>
+          <span className="gen-panel-price">{panel.price}</span>
+          <span className="gen-panel-save">Save {panel.saving}</span>
+        </div>
+        <button
+          type="button"
+          className="gen-panel-cta"
+          onClick={() => onAddPanel?.({ title: panel.title, text: panel.text, price: panel.price, tone: panel.tone, icon: panel.icon, chips: panel.categories })}
+        >
+          <img src={addIcon} alt="" aria-hidden="true" />
+          Add Panel
+        </button>
       </div>
     </article>
   );
@@ -1243,7 +1680,7 @@ function buildGeneticCheckoutSession(selectedPanels) {
   };
 }
 
-function CartAside({ selectedPanels, onRemovePanel, onAddPanel, onCheckout }) {
+function CartAside({ selectedPanels, onRemovePanel, onAddPanel, onCheckout, visible }) {
   const selectedCount = selectedPanels.length;
   const subtotal = selectedPanels.reduce((sum, panel) => sum + getPanelPriceValue(panel), 0);
   const progress = selectedCount > 0 ? Math.min((subtotal / minimumCheckoutTotal) * 100, 100) : 0;
@@ -1255,7 +1692,7 @@ function CartAside({ selectedPanels, onRemovePanel, onAddPanel, onCheckout }) {
   const primaryPanelBadgeIcon = typeof primaryPanel.icon === "string" && primaryPanel.icon !== "hormone-drop" ? primaryPanel.icon : wellnessIcon;
 
   return (
-    <aside className={`cart-panel sticky top-[5.5rem] ${selectedCount === 0 ? "cart-panel--empty" : "cart-panel--selected"}`}>
+    <aside className={`cart-panel${visible ? " cart-panel--visible" : ""} ${selectedCount === 0 ? "cart-panel--empty" : "cart-panel--selected"}`}>
       <div className="cart-panel-header">
         <h2>Your Selection</h2>
         <span>{selectedCount} {selectedCount === 1 ? "Item" : "Items"}</span>
@@ -1420,17 +1857,367 @@ function CartAside({ selectedPanels, onRemovePanel, onAddPanel, onCheckout }) {
   );
 }
 
+/* ── Most Popular Categories — OrangeHealth-style carousel ── */
+const popularCategoriesExtended = [
+  {
+    title: "Cancer Risk",
+    headline: "Know your cancer risk before it knows you",
+    description: "Understand your inherited cancer risks and take proactive steps toward prevention with clinical-grade genomic screening.",
+    stat: "52,000+ tests taken",
+    tag: "Most Chosen",
+    tagVariant: "chosen",
+    tone: "rose",
+    price: "₹6,999",
+    originalPrice: "₹9,999",
+    discount: "30% Off",
+    markers: "28+ markers",
+  },
+  {
+    title: "Heart Health",
+    headline: "Monitor your heart health",
+    description: "Test for silent cardiovascular issues with advanced cardiac genomic panels and cut future medical bills.",
+    stat: "38,400+ tests taken",
+    tag: "Cardiologist Pick",
+    tagVariant: "rose",
+    tone: "rose",
+    price: "₹5,999",
+    originalPrice: "₹8,499",
+    discount: "29% Off",
+    markers: "32+ markers",
+  },
+  {
+    title: "Diabetes Risk",
+    headline: "Get your metabolic health assessed",
+    description: "Understand your genetic predisposition to insulin resistance and diabetes. Act early, stay healthy.",
+    stat: "29,100+ tests taken",
+    tag: "Preventive",
+    tagVariant: "blue",
+    tone: "blue",
+    price: "₹4,999",
+    originalPrice: "₹6,999",
+    discount: "28% Off",
+    markers: "18+ markers",
+  },
+  {
+    title: "Hormone Health",
+    headline: "Balance your hormones, balance your life",
+    description: "Decode your hormonal blueprint — testosterone, estrogen, cortisol, thyroid and more at a genomic level.",
+    stat: "24,500+ tests taken",
+    tag: "Beginner Friendly",
+    tagVariant: "purple",
+    tone: "purple",
+    price: "₹5,499",
+    originalPrice: "₹7,999",
+    discount: "31% Off",
+    markers: "22+ markers",
+  },
+  {
+    title: "Fitness Potential",
+    headline: "Train smarter with your DNA",
+    description: "Unlock your genetic athletic profile — power, endurance, recovery, injury risk and nutrition response.",
+    stat: "18,700+ tests taken",
+    tag: "Performance",
+    tagVariant: "sea",
+    tone: "sea",
+    price: "₹4,499",
+    originalPrice: "₹6,499",
+    discount: "30% Off",
+    markers: "16+ markers",
+  },
+  {
+    title: "Mental Wellness",
+    headline: "Understand your mind at a genetic level",
+    description: "Explore genomic factors behind mood, stress resilience, sleep patterns and neurological health.",
+    stat: "15,200+ tests taken",
+    tag: "Trending",
+    tagVariant: "blue",
+    tone: "blue",
+    price: "₹5,999",
+    originalPrice: "₹8,499",
+    discount: "29% Off",
+    markers: "24+ markers",
+  },
+  {
+    title: "Fertility & Family",
+    headline: "Plan your family with confidence",
+    description: "Carrier screening and reproductive genomics to help you make informed family planning decisions.",
+    stat: "12,900+ tests taken",
+    tag: "Family Care",
+    tagVariant: "sea",
+    tone: "sea",
+    price: "₹6,499",
+    originalPrice: "₹9,499",
+    discount: "31% Off",
+    markers: "60+ markers",
+  },
+  {
+    title: "Pharmacogenomics",
+    headline: "Find the right medicine for your genes",
+    description: "Discover how your DNA affects drug metabolism so your doctor can prescribe with precision.",
+    stat: "9,600+ tests taken",
+    tag: "Precision Med",
+    tagVariant: "purple",
+    tone: "purple",
+    price: "₹7,499",
+    originalPrice: "₹10,999",
+    discount: "31% Off",
+    markers: "48+ markers",
+  },
+];
+
+const popcatIconMap = {
+  "Cancer Risk":        <PopcatCancerRiskIcon />,
+  "Heart Health":       <PopcatHeartHealthIcon />,
+  "Diabetes Risk":      <PopcatDiabetesRiskIcon />,
+  "Hormone Health":     <PopcatHormoneHealthIcon />,
+  "Fitness Potential":  <PopcatFitnessIcon />,
+  "Mental Wellness":    <PopcatMentalWellnessIcon />,
+  "Fertility & Family": <PopcatFertilityIcon />,
+  "Pharmacogenomics":   <PopcatPharmaIcon />,
+};
+
+function MostPopularCategories() {
+  const items = popularCategoriesExtended;
+  const [index, setIndex] = useState(0);
+
+  const prev = () => setIndex((i) => (i === 0 ? items.length - 1 : i - 1));
+  const next = () => setIndex((i) => (i === items.length - 1 ? 0 : i + 1));
+
+  useEffect(() => {
+    const t = setInterval(next, 4200);
+    return () => clearInterval(t);
+  }, [index]);
+
+  const item = items[index];
+
+  return (
+    <section className="popcats-section genetic-section-block">
+      {/* Section label */}
+      <div className="popcats-oh-label">
+        <span className="type-eyebrow popcats-eyebrow">
+          <TrendingFireIcon />
+          Most Popular Categories
+        </span>
+      </div>
+
+      {/* Main carousel body */}
+      <div className="popcats-oh-body">
+        {/* Left arrow */}
+        <button className="popcats-oh-arrow popcats-oh-arrow--left" onClick={prev} type="button" aria-label="Previous">
+          <ChevronLeftIcon />
+        </button>
+
+        {/* Left: dark card */}
+        <div className="popcats-oh-card">
+          <div className="popcats-oh-card-header">
+            <span className={`popcats-pill-badge popcats-badge--${item.tagVariant}`}>{item.tag}</span>
+            <span className="popcats-oh-markers">{item.markers}</span>
+          </div>
+          <div className="popcats-oh-card-mid">
+            <div className={`popcats-oh-icon-circle genetic-tone-${item.tone}`}>
+              {popcatIconMap[item.title]}
+            </div>
+            <div>
+              <p className="popcats-oh-card-title">{item.title}</p>
+              <p className="popcats-oh-stat">{item.stat}</p>
+            </div>
+          </div>
+          <div className="popcats-oh-card-footer">
+            <div className="popcats-oh-price-row">
+              <span className="popcats-oh-price">{item.price}</span>
+              <span className="popcats-oh-original">{item.originalPrice}</span>
+              <span className="popcats-oh-discount">{item.discount}</span>
+            </div>
+            <div className="popcats-oh-actions">
+              <button className="popcats-oh-btn-secondary" type="button">View Details</button>
+              <button className="popcats-oh-btn-primary" type="button">+ Add Panel</button>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: headline + description */}
+        <div className="popcats-oh-right">
+          <h2 className="popcats-oh-headline">{item.headline}</h2>
+          <p className="popcats-oh-desc">{item.description}</p>
+          <div className="popcats-oh-trust">
+            <div className="popcats-oh-trust-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2Z" />
+                <path d="M9 12l2 2 4-4" />
+              </svg>
+            </div>
+            <div>
+              <p className="popcats-oh-trust-title">Clinically validated</p>
+              <p className="popcats-oh-trust-sub">CAP & NABL certified labs</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Right arrow */}
+        <button className="popcats-oh-arrow popcats-oh-arrow--right" onClick={next} type="button" aria-label="Next">
+          <ChevronRightIcon />
+        </button>
+      </div>
+
+      {/* Dot indicators */}
+      <div className="popcats-oh-dots">
+        {items.map((_, i) => (
+          <button
+            key={i}
+            className={`popcats-oh-dot${i === index ? " popcats-oh-dot--active" : ""}`}
+            onClick={() => setIndex(i)}
+            type="button"
+            aria-label={`Go to ${items[i].title}`}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+const howItWorksSteps = [
+  {
+    step: "01",
+    title: "Select Your Panel",
+    text: "Browse clinical-grade genetic panels by category or choose a curated package tailored to your health goals.",
+    icon: detailKitIcon,
+  },
+  {
+    step: "02",
+    title: "At-Home Sample Collection",
+    text: "Receive a collection kit at home. Provide a simple saliva or blood sample — no clinic visit required.",
+    icon: detailDnaIcon,
+  },
+  {
+    step: "03",
+    title: "Lab Analysis",
+    text: "Your sample is processed in CAP & NABL certified labs using Whole Genome Sequencing technology.",
+    icon: detailPulseIcon,
+  },
+  {
+    step: "04",
+    title: "Genetic Counselor Session",
+    text: "A board-certified genetic counselor walks you through your results and answers your questions 1-on-1.",
+    icon: detailCounselorIcon,
+  },
+  {
+    step: "05",
+    title: "Interactive Report",
+    text: "Access your detailed genomic report on the Nucleotide dashboard — updated as science evolves, for life.",
+    icon: detailCheckIcon,
+  },
+];
+
+function HowItWorksView() {
+  return (
+    <section className="how-it-works-view">
+      <ol className="how-it-works-steps">
+        {howItWorksSteps.map((step, index) => (
+          <li key={step.step} className="how-it-works-step">
+            <div className="how-it-works-step-number">{step.step}</div>
+            {index < howItWorksSteps.length - 1 && <div className="how-it-works-connector" aria-hidden="true" />}
+            <div className="how-it-works-step-body">
+              <span className="how-it-works-icon">
+                <img src={step.icon} alt="" />
+              </span>
+              <div>
+                <h3 className="how-it-works-step-title">{step.title}</h3>
+                <p className="how-it-works-step-text">{step.text}</p>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+function ExploreCardsScroll({ cards, onOpen, onAddPanel }) {
+  const scrollRef = useRef(null);
+  const [visibleIndex, setVisibleIndex] = useState(0);
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const cardWidth = el.firstElementChild?.offsetWidth || 1;
+    const gap = 16;
+    const index = Math.round(el.scrollLeft / (cardWidth + gap));
+    setVisibleIndex(Math.min(index, cards.length - 1));
+  };
+
+  const remaining = cards.length - visibleIndex - 1;
+
+  return (
+    <div className="explore-cards-wrap">
+      <div
+        ref={scrollRef}
+        className="gen-recommended-scroll genetic-explore-scroll"
+        onScroll={handleScroll}
+      >
+        {cards.map((card) => (
+          <article
+            key={card.title}
+            className="gen-panel-card gen-explore-card"
+            role="button"
+            tabIndex={0}
+            onClick={() => onOpen(card)}
+            onKeyDown={(e) => e.key === "Enter" && onOpen(card)}
+          >
+            {card.overlayBadge && (
+              <span className={`gen-card-overlay-badge gen-card-overlay-badge--${card.overlayBadge.variant}`}>
+                {card.overlayBadge.variant === "chosen" ? <StarIcon /> : <LeafIcon />}
+                {card.overlayBadge.label}
+              </span>
+            )}
+            <div className="gen-panel-inner-top">
+              <div className="gen-panel-top-row">
+                <span className={`gen-panel-icon-circle genetic-tone-${card.tone}`}>
+                  <CardIcon icon={card.icon} />
+                </span>
+                <span className="gen-card-tag-pill">{card.tag}</span>
+              </div>
+              <h3 className="gen-panel-title">{card.title}</h3>
+              <p className="gen-panel-description">{card.text}</p>
+            </div>
+            <div className="gen-card-divider" aria-hidden="true" />
+            <div className="gen-panel-footer">
+              <p className="gen-panel-price">{card.price}</p>
+              <button
+                type="button"
+                className="gen-panel-cta"
+                onClick={(e) => { e.stopPropagation(); onAddPanel(card); }}
+                aria-label={`Add ${card.title} panel`}
+              >
+                <img src={addIcon} alt="" aria-hidden="true" />
+                Add Panel
+              </button>
+            </div>
+          </article>
+        ))}
+      </div>
+      <div className="explore-scroll-footer" aria-hidden="true">
+        <div className="explore-scroll-dots">
+          {cards.map((_, i) => (
+            <span key={i} className={`explore-dot${i === visibleIndex ? " explore-dot--active" : ""}`} />
+          ))}
+        </div>
+        <span className="explore-scroll-pill" aria-live="polite" aria-atomic="true">
+          {visibleIndex + 1}/{cards.length}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export function GeneticTestingPage({ onMenuClick }) {
   const { isLoggedIn, authReady, openLoginModal } = useAuth();
   const navigate = useNavigate();
-  const visibleCategoryCards = categoryCards.slice(0, 3);
-  const [activeSectionTab, setActiveSectionTab] = useState(sectionTabs[0]);
   const [selectedPanel, setSelectedPanel] = useState(null);
   const [selectedPanels, setSelectedPanels] = useState([]);
   const [pendingPanel, setPendingPanel] = useState(null);
+  const [activeSectionTab, setActiveSectionTab] = useState(sectionTabs[0]);
   const [activePanelTab, setActivePanelTab] = useState(panelTabs[0]);
   const [showCategoryFilter, setShowCategoryFilter] = useState(false);
-  const isCuratedPackages = activeSectionTab === "Curated Packages";
   const promptLogin = () => {
     savePostLoginRedirect(`${window.location.pathname}${window.location.search}${window.location.hash}`);
     openLoginModal();
@@ -1498,84 +2285,86 @@ export function GeneticTestingPage({ onMenuClick }) {
         onCtaClick={handleCartClick}
         activeHrefOverride="/genetics"
       />
-      <MobileSearchBar />
       <main className="genetic-testing-main relative mx-auto w-full max-w-[110rem] px-[clamp(1rem,2.6vw,3rem)] pb-[clamp(4rem,6vw,5.5rem)] pt-[clamp(1.35rem,2.35vw,2.8rem)]">
-        <div className="genetic-shell-grid relative grid gap-[clamp(1.25rem,1.8vw,2rem)] xl:grid-cols-[minmax(0,1fr)_minmax(18rem,21rem)] xl:items-start">
+        <div className="genetic-shell-grid genetic-shell-grid--full relative grid gap-[clamp(1.25rem,1.8vw,2rem)] xl:grid-cols-[minmax(0,1fr)] xl:items-start">
           <div className="genetic-content-stack min-w-0">
             <HeroSection />
-            <StartChoicePanel
-              activeSectionTab={activeSectionTab}
-              onSectionTabChange={setActiveSectionTab}
-            />
-            <StickyControls
-              activeSectionTab={activeSectionTab}
-              onSectionTabChange={setActiveSectionTab}
-              showBuildFilters={!isCuratedPackages}
-            />
-            <FeaturedPanel compact={isCuratedPackages} onAddPanel={handleAddPanel} />
-            {isCuratedPackages ? (
-              <CuratedPackagesView onAddPanel={handleAddPanel} />
-            ) : (
-              <>
-                <section className="genetic-section-block space-y-[clamp(0.9rem,1.15vw,1.2rem)]">
-                  <div className="flex items-center justify-between gap-4">
-                    <h2 className="type-section-title">Select Category</h2>
-                    <FilterButton onClick={() => setShowCategoryFilter(true)} />
-                  </div>
-                  <PackageFilterChips
-                    activeTab={activePanelTab}
-                    onTabChange={setActivePanelTab}
-                  />
-                  <div className="genetic-card-grid">
-                    {visibleCategoryCards.map((card) => <CategoryCard key={card.title} card={card} onOpen={setSelectedPanel} />)}
-                  </div>
-                </section>
-                {showCategoryFilter && (
-                  <FilterSheet
-                    activeTab={activePanelTab}
-                    onSelect={setActivePanelTab}
-                    onClose={() => setShowCategoryFilter(false)}
-                  />
-                )}
-                <section className="genetic-section-block genetic-recommended-section space-y-[clamp(0.9rem,1.15vw,1.2rem)]">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="recommended-panels-title type-eyebrow">Recommended Panels</p>
-                    </div>
-                    <a href="#all" className="recommended-view-all type-caption text-nucleotide-purple">View All</a>
-                  </div>
-                  <div className="curated-package-grid">
-                    {recommendedPanels.map((panel, index) => (
-                      <RecommendedPanel
-                        key={panel.title}
-                        panel={panel}
-                        icon={index === 0 ? wellnessIcon : cardiacProfileIcon}
-                        showBadge={index === 0}
-                      />
-                    ))}
-                  </div>
-                </section>
-              </>
-            )}
-            <section className="faq-section">
-              <p className="faq-title type-eyebrow">Have Questions?</p>
-              <div className="faq-list">
-                {faqs.map((faq) => (
-                  <button key={faq} className="faq-item type-card-title" type="button">
-                    <span>{faq}</span>
-                    <img src={chevronIcon} alt="" className="faq-chevron" />
-                  </button>
-                ))}
+
+            {/* Tabbed section: Build Your Panel / Curated Packages / How It Works */}
+            <section className="genetic-section-block genetic-tabs-section">
+              {/* Sticky tab bar */}
+              <div className="genetic-tab-bar sticky top-[5rem] z-30">
+                {sectionTabs.map((tab) => {
+                  const isActive = activeSectionTab === tab;
+                  return (
+                    <button
+                      key={tab}
+                      type="button"
+                      aria-pressed={isActive}
+                      onClick={() => setActiveSectionTab(tab)}
+                      className={[
+                        "genetic-tab-btn",
+                        isActive ? "genetic-tab-btn--active" : "",
+                      ].join(" ")}
+                    >
+                      {tab}
+                    </button>
+                  );
+                })}
               </div>
+              {activeSectionTab === "Build Your Panel" && <MobileBuildPanelControls />}
+
+              {/* Tab: Build Your Panel */}
+              {activeSectionTab === "Build Your Panel" && (
+                <div className="genetic-tab-content">
+                  {/* Category cards */}
+                  <ExploreCardsScroll cards={categoryCards} onOpen={setSelectedPanel} onAddPanel={handleAddPanel} />
+
+                  {/* Trending Tests — OrangeHealth-style carousel */}
+                  {/* Recommended Panels — below explore cards */}
+                  <div className="build-panel-recommended">
+                    <div className="gen-section-header gen-section-header--centered build-panel-section-head">
+                      <div className="gen-section-heading-group">
+                        <h2 className="type-section-title">Recommended Panels</h2>
+                        <p className="gen-section-subtitle">Expert-curated bundles for whole-body genomic insights.</p>
+                      </div>
+                    </div>
+                    <div className="gen-recommended-scroll">
+                      {recommendedPanels.map((panel) => (
+                        <RecommendedPanelCard
+                          key={panel.title}
+                          panel={panel}
+                          onAddPanel={handleAddPanel}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab: Curated Packages */}
+              {activeSectionTab === "Curated Packages" && (
+                <div className="genetic-tab-content">
+                  <CuratedPackagesView onAddPanel={handleAddPanel} />
+                </div>
+              )}
+
+              {/* Tab: How It Works */}
+              {activeSectionTab === "How It Works" && (
+                <div className="genetic-tab-content">
+                  <HowItWorksView />
+                </div>
+              )}
             </section>
-          </div>
-          <div className="cart-aside-shell">
-            <CartAside
-              selectedPanels={selectedPanels}
-              onRemovePanel={handleRemovePanel}
-              onAddPanel={handleAddPanel}
-              onCheckout={handleCheckout}
-            />
+
+            {showCategoryFilter && (
+              <FilterSheet
+                activeTab={activePanelTab}
+                onSelect={setActivePanelTab}
+                onClose={() => setShowCategoryFilter(false)}
+              />
+            )}
+
           </div>
         </div>
       </main>
@@ -1586,6 +2375,13 @@ export function GeneticTestingPage({ onMenuClick }) {
           onClose={() => setSelectedPanel(null)}
         />
       )}
+      <CartAside
+        selectedPanels={selectedPanels}
+        onRemovePanel={handleRemovePanel}
+        onAddPanel={handleAddPanel}
+        onCheckout={handleCheckout}
+        visible={selectedPanels.length > 0}
+      />
     </div>
   );
 }

@@ -447,10 +447,10 @@ a {
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.75rem;
-  border-block-end: 0.0625rem solid rgba(255,255,255,0.12);
-  background: #8b5cf6;
+  border-block-end: 0.0625rem solid #ede8fb;
+  background: linear-gradient(160deg, #ede8fb 0%, #f5f2ff 50%, #ffffff 100%);
   padding: 1.15rem 1.25rem 1rem;
-  color: #ffffff;
+  color: #131b2e;
 }
 
 .panel-detail-heading-row {
@@ -468,7 +468,8 @@ a {
   place-items: center;
   border-radius: 999rem;
   background: #ffffff;
-  color: #e12d2d;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.14);
+  color: #7c3aed;
 }
 
 .panel-detail-header-icon svg,
@@ -479,13 +480,14 @@ a {
 
 .panel-detail-title {
   max-width: 100%;
-  color: #ffffff;
+  color: #131b2e;
   font-family: var(--font-heading);
-  font-size: 1.25rem;
+  font-size: clamp(0.95rem, 2.5vw, 1.25rem);
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.2;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
 .panel-detail-badges {
@@ -499,14 +501,14 @@ a {
   display: inline-flex;
   align-items: center;
   border-radius: 999rem;
-  background: rgba(255, 255, 255, 0.18);
-  color: #ffffff;
+  background: #ffffff;
+  color: #6b38d4;
   font-family: var(--font-body);
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.35;
   padding: 0.2rem 0.65rem;
-  border: 0.0625rem solid rgba(255, 255, 255, 0.25);
+  border: 0.0625rem solid #d3c4f4;
 }
 
 .panel-trust-row span,
@@ -530,14 +532,17 @@ a {
   flex: 0 0 auto;
   place-items: center;
   border-radius: 999rem;
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.15);
-  transition: background-color 160ms ease;
+  color: #6b38d4;
+  background: #ffffff;
+  border: 1px solid #d3c4f4;
+  box-shadow: 0 1px 4px rgba(139, 92, 246, 0.10);
+  transition: background-color 160ms ease, box-shadow 160ms ease;
 }
 
 .panel-detail-close:hover,
 .panel-detail-close:focus-visible {
-  background: rgba(255, 255, 255, 0.28);
+  background: #f0ebff;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.18);
   outline: none;
 }
 
@@ -1212,6 +1217,7 @@ a {
 @media (max-width: 40rem) {
   .panel-detail-backdrop {
     align-items: flex-end;
+    top: var(--genetic-mobile-nav-offset, 4rem);
     padding: 0;
   }
 
@@ -1221,24 +1227,64 @@ a {
 
   .panel-detail-modal {
     width: 100%;
-    max-height: 92dvh;
+    height: 80dvh;
+    max-height: 80dvh;
     border-radius: 1.25rem 1.25rem 0 0;
     animation: sheet-slide-up 0.32s cubic-bezier(0.32, 0.72, 0, 1) both;
     background: #ffffff;
   }
 
   .panel-detail-header {
-    padding: 1rem 1.25rem 0.9rem;
+    padding: max(0.85rem, env(safe-area-inset-top)) 1rem 0.8rem;
     border-radius: 1.25rem 1.25rem 0 0;
   }
 
+  .panel-detail-heading-row {
+    align-items: flex-start;
+    gap: 0.72rem;
+  }
+
+  .panel-detail-title {
+    padding-inline-end: 0.25rem;
+    font-size: clamp(1.35rem, 6vw, 1.65rem);
+    letter-spacing: 0;
+    line-height: 1.18;
+  }
+
+  .panel-detail-header-icon {
+    width: 2rem;
+    height: 2rem;
+    margin-block-start: 0.35rem;
+  }
+
+  .panel-detail-badges {
+    gap: 0.45rem;
+    margin-block-start: 0.7rem;
+  }
+
+  .panel-detail-close {
+    width: 2.15rem;
+    margin-block-start: -0.1rem;
+    margin-inline-end: -0.15rem;
+  }
+
   .panel-detail-content {
-    padding: 1rem 1.25rem;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 0.95rem 1rem 1.05rem;
     background: #ffffff;
   }
 
+  .panel-detail-section h3,
+  .panel-included-section h3 {
+    font-size: 1rem;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+
   .panel-detail-footer {
-    padding: 0.9rem 1.25rem;
+    gap: 0.65rem;
+    padding: 0.8rem 1rem calc(0.8rem + env(safe-area-inset-bottom));
   }
 
   .panel-conditions-list {
@@ -1250,7 +1296,22 @@ a {
     flex-direction: column;
   }
 
+  .panel-detail-price {
+    font-size: 1.35rem;
+  }
+
+  .panel-trust-row {
+    gap: 0.4rem;
+    margin-block-start: 0.35rem;
+  }
+
+  .panel-trust-row span {
+    font-size: 0.68rem;
+    padding: 0.28rem 0.55rem;
+  }
+
   .panel-detail-add {
+    min-height: 2.75rem;
     width: 100%;
   }
 }
@@ -1470,15 +1531,20 @@ a {
 .genetic-testing-page {
   --font-heading: Poppins, sans-serif;
   --font-body: Poppins, sans-serif;
-  --type-hero: clamp(1.75rem, 1.2rem + 2.4vmin, 3rem);
+  /* Section title: content-page scale (not landing-hero scale), same style rules as bloodtest .type-section */
+  --type-hero: clamp(1.75rem, 1.1rem + 2.55vmin, 3rem);
   --type-page: clamp(1.5rem, 0.9rem + 2vmin, 2.5rem);
-  --type-section: clamp(1.25rem, 0.9rem + 1.25vmin, 1.875rem);
-  --type-card: clamp(0.9375rem, 0.82rem + 0.55vmin, 1.25rem);
-  --type-body: clamp(0.875rem, 0.8rem + 0.32vmin, 1.0625rem);
-  --type-body-sm: clamp(0.8125rem, 0.75rem + 0.28vmin, 0.9375rem);
+  --type-section: clamp(1.35rem, 1rem + 1.6vmin, 2.2rem);
+  /* Exact bloodtest --type-subhead for card titles */
+  --type-card: clamp(1rem, 0.86rem + 0.7vmin, 1.5rem);
+  /* Exact bloodtest --type-body */
+  --type-body: clamp(0.8125rem, 0.74rem + 0.38vmin, 1.125rem);
+  --type-body-sm: clamp(0.8125rem, 0.74rem + 0.38vmin, 1.125rem);
   --type-caption: clamp(0.75rem, 0.7rem + 0.22vmin, 0.875rem);
   --type-eyebrow: clamp(0.625rem, 0.58rem + 0.2vmin, 0.75rem);
-  --type-price: clamp(1.0625rem, 0.88rem + 0.85vmin, 1.625rem);
+  /* Exact bloodtest --type-price */
+  --type-price: clamp(1.125rem, 0.92rem + 1.05vmin, 2rem);
+  /* Exact bloodtest line-height tokens */
   --lh-section: 1.22;
   --lh-snug: 1.27;
   --lh-ui: 1.3;
@@ -1497,8 +1563,8 @@ a {
 }
 
 .genetic-testing-page .genetic-testing-main {
-  max-width: min(calc(100% - 2rem), 81.5rem);
-  padding: var(--genetic-page-top) var(--genetic-page-x) var(--genetic-page-bottom) !important;
+  max-width: none;
+  padding: 1rem 0 var(--genetic-page-bottom) !important;
 }
 
 .genetic-testing-page .genetic-shell-grid {
@@ -1509,6 +1575,51 @@ a {
 @media (min-width: 80rem) {
   .genetic-testing-page .genetic-shell-grid {
     grid-template-columns: minmax(0, 60rem) 19.5rem !important;
+  }
+
+  .genetic-testing-page .genetic-shell-grid--full {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .genetic-testing-page .genetic-recommended-section .gen-recommended-scroll {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    overflow: visible;
+    padding-block-end: 0;
+  }
+
+  .genetic-testing-page .genetic-recommended-section .gen-panel-card {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .genetic-testing-page .build-panel-recommended .gen-recommended-scroll {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    overflow: visible;
+    padding-block-end: 0;
+  }
+
+  .genetic-testing-page .build-panel-recommended .gen-panel-card {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .genetic-testing-page .genetic-tabs-section .genetic-explore-scroll {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    width: min(100%, 46rem);
+    margin-inline: 0 auto;
+    overflow: visible;
+    padding-block-end: 0;
+  }
+
+  .genetic-testing-page .genetic-tabs-section .gen-explore-card {
+    width: 100%;
+    min-width: 0;
   }
 }
 
@@ -1530,45 +1641,50 @@ a {
   font-size: 1rem;
 }
 
+/* ── Typography — mirrors bloodtest/index.css .type-section / .type-lead ── */
+
 .genetic-testing-page .type-hero-title,
 .genetic-testing-page .type-page-title,
 .genetic-testing-page .type-section-title,
 .genetic-testing-page .type-card-title {
-  font-family: var(--font-heading);
+  font-family: Poppins, sans-serif;
   letter-spacing: -0.03em;
+  color: #101129;
 }
 
 .genetic-testing-page .type-hero-title {
   font-size: var(--type-hero);
   font-weight: 500;
-  line-height: var(--lh-section);
+  line-height: 1.22;
 }
 
 .genetic-testing-page .type-page-title {
   font-size: var(--type-page);
   font-weight: 500;
-  line-height: var(--lh-section);
+  line-height: 1.22;
 }
 
+/* Exact match: bloodtest .type-section — Poppins 500, lh 1.22, ls -0.03em */
 .genetic-testing-page .type-section-title {
   font-size: var(--type-section);
   font-weight: 500;
-  line-height: var(--lh-section);
+  line-height: 1.22;
 }
 
+/* bloodtest .type-card-title — Poppins 600, subhead sizing */
 .genetic-testing-page .type-card-title {
   font-size: var(--type-card);
   font-weight: 600;
   letter-spacing: -0.02em;
-  line-height: var(--lh-snug);
+  line-height: 1.27;
 }
 
 
 .genetic-testing-page .type-body,
 .genetic-testing-page .type-body-sm {
-  font-family: var(--font-body);
+  font-family: Poppins, sans-serif;
   font-weight: 400;
-  line-height: var(--lh-body);
+  line-height: 1.45;
 }
 
 .genetic-testing-page .type-body {
@@ -1618,6 +1734,22 @@ a {
   gap: var(--genetic-stack-gap);
 }
 
+.genetic-testing-page .genetic-hero-panel {
+  width: calc(100% - 78px);
+  margin-inline: auto;
+}
+
+.genetic-testing-page .genetic-hero-wrapper {
+  width: calc(100% - 78px);
+  margin-inline: auto;
+}
+
+.genetic-testing-page .genetic-section-block,
+.genetic-testing-page .faq-section {
+  width: min(1200px, calc(100% - (var(--pad-section-x, 72px) * 2)));
+  margin-inline: auto;
+}
+
 .genetic-mobile-discovery {
   display: none;
 }
@@ -1647,10 +1779,10 @@ a {
 }
 
 .genetic-testing-page .genetic-ribbon-panel {
-  border: 0.0625rem solid rgba(107, 56, 212, 0.3);
-  border-radius: 0.88rem;
+  border: 0;
+  border-radius: 20px;
   background: linear-gradient(90deg, #101129 0%, #2a2c5b 81.01%);
-  padding: 2.15rem 1.85rem !important;
+  padding: 0 clamp(2.5rem, 10.8vw, 12rem) !important;
   box-shadow:
     0 0.625rem 0.9375rem -0.1875rem rgba(0, 0, 0, 0.1),
     0 0.25rem 0.375rem -0.25rem rgba(0, 0, 0, 0.1);
@@ -1658,11 +1790,17 @@ a {
 
 .genetic-testing-page .genetic-hero-panel {
   position: relative;
-  min-height: 21rem;
+  min-height: 0;
+  aspect-ratio: 1920 / 559;
+  height: auto;
   background:
     linear-gradient(90deg, rgba(17, 17, 45, 0.98) 0%, rgba(34, 35, 76, 0.92) 48%, rgba(42, 44, 91, 0.72) 100%),
     #101129;
   isolation: isolate;
+}
+
+.genetic-testing-page .genetic-hero-panel::after {
+  display: none;
 }
 
 .genetic-testing-page .genetic-hero-panel .type-hero-title,
@@ -1675,7 +1813,7 @@ a {
   inset-block: 0;
   inset-inline-end: 0;
   z-index: 0;
-  width: min(65%, 45rem);
+  width: min(70%, 68rem);
   height: 100%;
   object-fit: cover;
   object-position: center right;
@@ -1693,7 +1831,81 @@ a {
   gap: 1.55rem;
   height: 100%;
   justify-content: center;
-  max-width: min(56%, 35rem);
+  max-width: min(48%, 45rem);
+}
+
+/* ── Hero trust badge row ──────────────────────────────────────── */
+.genetic-hero-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 1.8vmin, 22px);
+  margin-block-end: clamp(8px, 1vmin, 12px);
+}
+
+.genetic-hero-trust-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(8px, 1vmin, 12px);
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(6px, 0.8vmin, 8px);
+  border-radius: 999px;
+  padding: clamp(7px, 0.9vmin, 10px) clamp(12px, 1.4vmin, 16px);
+  font-family: var(--font-heading);
+  font-size: clamp(0.72rem, 1.1vmin, 0.82rem);
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.hero-badge-icon-wrap {
+  display: grid;
+  place-items: center;
+  width: clamp(18px, 2.2vmin, 22px);
+  height: clamp(18px, 2.2vmin, 22px);
+  flex-shrink: 0;
+}
+
+.hero-badge-icon-wrap img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+}
+
+/* Amber — CAP & NABL Certified */
+.hero-badge--amber {
+  background: rgba(255, 203, 113, 0.14);
+  border: 1px solid rgba(255, 203, 113, 0.55);
+  color: #b97d10;
+}
+
+/* Green — Free Blood Collection */
+.hero-badge--green {
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.45);
+  color: #0a7a5a;
+}
+
+/* Teal — Interactive Reports */
+.hero-badge--teal {
+  background: rgba(65, 201, 179, 0.12);
+  border: 1px solid rgba(65, 201, 179, 0.45);
+  color: #1a7a6e;
+}
+
+/* Blue/Purple — Secure & Private */
+.hero-badge--blue {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  color: #5b21b6;
+}
+
+.hero-badge--blue .hero-badge-icon-wrap img {
+  filter: invert(24%) sepia(60%) saturate(2000%) hue-rotate(248deg) brightness(80%);
 }
 
 .genetic-testing-page .genetic-ribbon-copy-stack {
@@ -2068,7 +2280,7 @@ a {
 }
 
 .genetic-testing-page .genetic-recommended-section {
-  padding-block-start: 0.8rem;
+  padding-block-start: clamp(1rem, 1.4vw, 1.5rem);
 }
 
 .genetic-testing-page .genetic-recommended-section > div:first-child {
@@ -2090,6 +2302,1038 @@ a {
   font-size: var(--type-caption);
   font-weight: 600;
   line-height: 1.2;
+}
+
+/* ── New genetic test card (BloodTest-matched) ─────────────────────────── */
+
+.gen-section-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-block-end: clamp(1rem, 1.4vw, 1.35rem);
+  text-align: center;
+}
+
+.gen-section-header--filter {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+}
+
+.gen-section-heading-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  text-align: center;
+}
+
+.gen-section-header--filter .gen-section-heading-group {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.genetic-testing-page .gen-section-header:not(.gen-section-header--filter) .type-section-title {
+  text-align: center;
+}
+
+/* Exact match: bloodtest .type-lead — Poppins 400, lh 1.45, bloodtest --type-lead size */
+.gen-section-subtitle {
+  color: #828282;
+  font-family: Poppins, sans-serif;
+  font-size: clamp(0.95rem, 0.84rem + 0.6vmin, 1.35rem);
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: 0;
+  margin: 0;
+  text-align: center;
+}
+
+.gen-section-header--filter .gen-section-subtitle {
+  text-align: left;
+}
+
+.gen-view-all-link {
+  flex-shrink: 0;
+  color: #8b5cf6;
+  font-family: var(--font-heading);
+  font-size: var(--type-caption);
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  padding-block-start: 0.35rem;
+}
+
+.gen-view-all-link:hover {
+  color: #6b38d4;
+  text-decoration: underline;
+}
+
+/* Vertical card list */
+.gen-test-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5rem, 2.2vw, 2rem);
+  margin-block-start: clamp(1rem, 1.4vw, 1.35rem);
+}
+
+/* Individual test card */
+.gen-test-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e7e1ff;
+  border-radius: clamp(16px, 2.1vmin, 20px);
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.08);
+  padding: clamp(8px, 1.1vmin, 10px);
+  cursor: pointer;
+  transition: box-shadow 180ms ease, transform 180ms ease;
+  overflow: visible;
+}
+
+.gen-test-card:hover {
+  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.16);
+  transform: translateY(-2px);
+}
+
+.gen-test-card:focus-visible {
+  outline: 0.25rem solid rgba(139, 92, 246, 0.22);
+  outline-offset: 0.1875rem;
+}
+
+/* Overlay badge (half-outside top of card) */
+.gen-card-overlay-badge {
+  position: absolute;
+  top: -13px;
+  left: clamp(14px, 1.3vmin, 18px);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 6px 6px 6px 0;
+  padding: 3px 10px 3px 8px;
+  font-family: var(--font-heading);
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  color: #ffffff;
+  background: linear-gradient(125.97deg, #101129 2.88%, #2a2c5b 93.49%);
+  z-index: 2;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.gen-card-overlay-badge--chosen {
+  background: linear-gradient(125.97deg, #14532d 2.88%, #166534 93.49%);
+}
+
+.gen-card-overlay-badge--beginner {
+  background: linear-gradient(125.97deg, #14532d 2.88%, #15803d 93.49%);
+}
+
+.gen-card-overlay-badge--value {
+  background: linear-gradient(125.97deg, #101129 2.88%, #2a2c5b 93.49%);
+}
+
+/* Inner top gradient section */
+.gen-card-inner-top {
+  border-radius: clamp(8px, 1.2vmin, 10px);
+  background: linear-gradient(180deg, #e7e1ff 0%, #ffffff 82%);
+  padding: clamp(16px, 1.8vmin, 20px) clamp(14px, 1.6vmin, 18px) clamp(14px, 1.6vmin, 18px);
+  padding-block-start: clamp(22px, 2.6vmin, 28px);
+}
+
+.gen-card-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.gen-card-icon-circle {
+  display: grid;
+  place-items: center;
+  width: clamp(52px, 6.5vmin, 64px);
+  height: clamp(52px, 6.5vmin, 64px);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.gen-card-icon-circle img,
+.gen-card-icon-circle svg {
+  width: clamp(24px, 3vmin, 30px) !important;
+  height: clamp(24px, 3vmin, 30px) !important;
+  object-fit: contain;
+}
+
+.gen-card-tag-pill {
+  border: 1px solid #e7e1ff;
+  border-radius: 999px;
+  background: #ffffff;
+  padding: 4px 12px;
+  font-family: var(--font-heading);
+  font-size: var(--type-caption);
+  font-weight: 500;
+  color: #8b5cf6;
+  white-space: nowrap;
+}
+
+.gen-card-title {
+  margin-block-start: 0.75rem;
+  font-family: var(--font-heading);
+  font-size: var(--type-card);
+  font-weight: 700;
+  line-height: 1.22;
+  letter-spacing: -0.02em;
+  color: #161616;
+}
+
+.gen-card-description {
+  margin: clamp(10px, 1.2vmin, 14px) clamp(8px, 1.1vmin, 10px);
+  font-family: var(--font-heading);
+  font-size: var(--type-body);
+  font-weight: 400;
+  line-height: 1.45;
+  color: #828282;
+  flex: 1;
+}
+
+.gen-card-divider {
+  margin: 0 clamp(8px, 1.1vmin, 10px);
+  border-top: 1px dashed #8b5cf6;
+  opacity: 0.45;
+}
+
+.gen-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: clamp(10px, 1.3vmin, 14px) clamp(8px, 1.1vmin, 10px) clamp(8px, 1vmin, 10px);
+}
+
+.gen-card-price {
+  font-family: var(--font-heading);
+  font-size: var(--type-price);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  color: #161616;
+  margin: 0;
+}
+
+.gen-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 8px;
+  background: #8b5cf6;
+  color: #ffffff;
+  font-family: var(--font-heading);
+  font-size: var(--type-body-sm);
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.6rem 1.1rem;
+  cursor: pointer;
+  transition: background 150ms ease;
+  white-space: nowrap;
+}
+
+.gen-card-cta:hover {
+  background: #7c3aed;
+}
+
+/* ── Recommended Panels horizontal scroll ──────────────────────────────── */
+
+.gen-recommended-scroll {
+  display: flex;
+  gap: clamp(1rem, 1.5vw, 1.35rem);
+  overflow-x: auto;
+  overflow-y: visible;
+  padding-block-start: 1.1rem;
+  padding-block-end: 0.75rem;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.gen-recommended-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Section tab bar ───────────────────────────────────────────────────── */
+
+.genetic-tabs-section {
+  padding-block-start: clamp(1rem, 1.4vw, 1.5rem);
+}
+
+.genetic-tab-bar {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #e7e1ff;
+  background: rgba(250, 248, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 0;
+  padding: 0 clamp(0.5rem, 1vw, 1rem);
+  margin-bottom: clamp(1.5rem, 2vw, 2rem);
+}
+
+.genetic-tab-btn {
+  position: relative;
+  padding: clamp(0.75rem, 1vw, 1rem) clamp(1rem, 1.5vw, 1.5rem);
+  font-family: var(--font-heading);
+  font-size: var(--type-body-sm);
+  font-weight: 500;
+  color: #494454;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  margin-bottom: -1px;
+}
+
+.genetic-tab-btn:hover {
+  color: #6b38d4;
+  border-bottom-color: #d3c4f4;
+}
+
+.genetic-tab-btn--active {
+  color: #6b38d4;
+  border-bottom-color: #6b38d4;
+  font-weight: 600;
+}
+
+.genetic-tab-content {
+  padding-block-start: clamp(0.5rem, 0.8vw, 1rem);
+}
+
+.genetic-mobile-panel-controls {
+  display: none;
+}
+
+.build-panel-filters {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.75rem, 1vw, 1rem);
+  margin-bottom: clamp(1.5rem, 2vw, 2rem);
+}
+
+.build-panel-search {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 3rem;
+  width: 100%;
+  max-width: 34rem;
+  border: 1px solid rgba(203, 195, 215, 0.45);
+  border-radius: 999px;
+  background: #fff;
+  padding: 0 1rem;
+  color: #7b7486;
+  box-shadow: 0 0.25rem 1.5rem rgba(139, 92, 246, 0.04);
+}
+
+.build-panel-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+}
+
+.build-panel-recommended {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 1.4vw, 1.5rem);
+  margin-bottom: clamp(2rem, 2.5vw, 2.5rem);
+}
+
+.build-panel-section-head {
+  margin-bottom: clamp(1rem, 1.4vw, 1.5rem);
+}
+
+/* ── Explore scroll — 4-col grid on desktop ─────────────────────────── */
+
+.genetic-explore-scroll {
+  /* inherits gen-recommended-scroll flex/scroll; desktop grid override below */
+}
+
+/* ── Explore cards scroll indicator ─────────────────────────────────── */
+
+.explore-cards-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: linear-gradient(180deg, #f0ecff 0%, #faf8ff 55%, #ffffff 100%);
+  border-radius: 1.25rem;
+  border: 1px solid rgba(203, 195, 215, 0.35);
+  padding: clamp(1rem, 1.5vw, 1.5rem) clamp(0.75rem, 1.2vw, 1.25rem);
+}
+
+.explore-scroll-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding-block: 2px 4px;
+}
+
+.explore-scroll-dots {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.explore-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #d8d0f0;
+  transition: background 200ms, transform 200ms;
+}
+
+.explore-dot--active {
+  background: #6b38d4;
+  transform: scale(1.35);
+}
+
+.explore-scroll-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #2a2140;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  padding: 3px 10px;
+  min-width: 2.6rem;
+}
+
+@media (min-width: 48rem) {
+  .explore-scroll-footer {
+    display: none;
+  }
+}
+
+/* ── How It Works view ─────────────────────────────────────────────────── */
+
+.how-it-works-view {
+  padding: clamp(1rem, 1.5vw, 1.5rem) 0;
+}
+
+.how-it-works-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.how-it-works-step {
+  position: relative;
+  display: flex;
+  gap: clamp(1rem, 1.5vw, 1.5rem);
+  align-items: flex-start;
+  padding-bottom: clamp(1.5rem, 2vw, 2rem);
+}
+
+.how-it-works-step-number {
+  flex-shrink: 0;
+  width: clamp(2.5rem, 3.5vw, 3rem);
+  height: clamp(2.5rem, 3.5vw, 3rem);
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6b38d4 0%, #8b5cf6 100%);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: var(--type-caption);
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.how-it-works-connector {
+  position: absolute;
+  left: calc(clamp(2.5rem, 3.5vw, 3rem) / 2);
+  top: clamp(2.5rem, 3.5vw, 3rem);
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, #c4b5fd 0%, #e7e1ff 100%);
+  z-index: 0;
+}
+
+.how-it-works-step-body {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(0.75rem, 1vw, 1rem);
+  padding-top: 0.25rem;
+  flex: 1;
+}
+
+.how-it-works-icon {
+  flex-shrink: 0;
+  width: clamp(2rem, 3vw, 2.5rem);
+  height: clamp(2rem, 3vw, 2.5rem);
+  border-radius: clamp(8px, 1vmin, 10px);
+  background: #f0ebff;
+  display: grid;
+  place-items: center;
+}
+
+.how-it-works-icon img {
+  width: clamp(16px, 2vmin, 20px);
+  height: clamp(16px, 2vmin, 20px);
+  object-fit: contain;
+}
+
+.how-it-works-step-title {
+  font-family: var(--font-heading);
+  font-size: var(--type-card);
+  font-weight: 600;
+  color: #131b2e;
+  margin: 0 0 0.3rem;
+  line-height: 1.3;
+}
+
+.how-it-works-step-text {
+  font-family: var(--font-heading);
+  font-size: var(--type-body-sm);
+  color: #5c5673;
+  margin: 0;
+  line-height: 1.6;
+}
+
+@media (min-width: 48rem) {
+  .how-it-works-steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(1rem, 1.5vw, 1.5rem);
+  }
+
+  .how-it-works-step {
+    flex-direction: column;
+    align-items: flex-start;
+    padding-bottom: 0;
+  }
+
+  .how-it-works-connector {
+    display: none;
+  }
+
+  .how-it-works-step-body {
+    flex-direction: column;
+  }
+}
+
+/* ── Recommended Panel card — BloodTest matched, premium width ─────────── */
+
+.gen-panel-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: clamp(300px, 42vw, 420px);
+  border: 1px solid #e0d8f8;
+  border-radius: clamp(16px, 2.1vmin, 20px);
+  background: #ffffff;
+  box-shadow: 0 4px 18px rgba(107, 56, 212, 0.10);
+  overflow: visible;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+  cursor: pointer;
+}
+
+.gen-panel-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.10);
+}
+
+/* Inner top gradient */
+.gen-panel-inner-top {
+  border-radius: clamp(8px, 1.2vmin, 10px);
+  background: linear-gradient(180deg, #f3f0fd 0%, #ffffff 70%);
+  padding: clamp(12px, 1.4vmin, 16px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(6px, 0.8vmin, 8px);
+  overflow: hidden;
+}
+
+.gen-panel-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.gen-panel-icon-circle {
+  display: grid;
+  place-items: center;
+  width: clamp(52px, 6.5vmin, 64px);
+  height: clamp(52px, 6.5vmin, 64px);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.gen-panel-icon-circle img {
+  width: clamp(24px, 3vmin, 30px) !important;
+  height: clamp(24px, 3vmin, 30px) !important;
+  object-fit: contain;
+}
+
+/* Colourful badge pill — top-right of inner-top */
+.gen-panel-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-heading);
+  font-size: 0.65rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 4px 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.badge--popular {
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  color: #6d28d9;
+}
+
+.badge--rose {
+  background: rgba(251, 113, 133, 0.12);
+  border: 1px solid rgba(251, 113, 133, 0.4);
+  color: #be123c;
+}
+
+.badge--teal {
+  background: rgba(65, 201, 179, 0.12);
+  border: 1px solid rgba(65, 201, 179, 0.4);
+  color: #0f766e;
+}
+
+.badge--blue {
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #1d4ed8;
+}
+
+.gen-panel-title {
+  font-family: var(--font-heading);
+  font-size: var(--type-card);
+  font-weight: 700;
+  color: #161616;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.gen-panel-description {
+  font-family: Poppins, sans-serif;
+  font-size: var(--type-caption);
+  color: #5c5673;
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Body: markers + chips */
+.gen-panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: clamp(10px, 1.2vmin, 14px) clamp(12px, 1.4vmin, 16px);
+}
+
+.gen-panel-markers {
+  display: inline-flex;
+  align-self: flex-start;
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #6d28d9;
+  border: 1px solid #d6caff;
+  background: #ede8fb;
+  border-radius: 999px;
+  padding: 4px 12px;
+}
+
+.gen-panel-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.gen-panel-chip {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-heading);
+  font-size: 0.67rem;
+  font-weight: 600;
+  color: #5b4b8a;
+  border: 1px solid #e2daf6;
+  background: #faf8ff;
+  border-radius: 999px;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+
+/* Footer */
+.gen-panel-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: clamp(10px, 1.2vmin, 14px) clamp(10px, 1.3vmin, 14px) clamp(12px, 1.4vmin, 16px);
+}
+
+.gen-panel-price-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.gen-panel-original {
+  font-family: var(--font-heading);
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: #aaa;
+  text-decoration: line-through;
+  line-height: 1.2;
+}
+
+.gen-panel-price {
+  font-family: var(--font-heading);
+  font-size: var(--type-price);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #161616;
+  line-height: 1;
+}
+
+.gen-panel-save {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #b2ead7;
+  border-radius: 5px;
+  background: #e6f6f3;
+  color: #0f766e;
+  font-family: var(--font-heading);
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  width: fit-content;
+  margin-block-start: 4px;
+}
+
+.gen-panel-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 8px;
+  background: #8b5cf6;
+  color: #ffffff;
+  font-family: var(--font-heading);
+  font-size: var(--type-caption);
+  font-weight: 600;
+  padding: clamp(12px, 1.5vmin, 16px) clamp(20px, 2.2vmin, 26px);
+  cursor: pointer;
+  transition: background 150ms, box-shadow 150ms;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.28);
+  white-space: nowrap;
+}
+
+.gen-panel-cta img {
+  width: 13px !important;
+  height: 13px !important;
+  filter: brightness(10);
+}
+
+.gen-panel-cta:hover {
+  background: #7c3aed;
+  box-shadow: 0 6px 18px rgba(139, 92, 246, 0.42);
+}
+
+/* ── Trending Tests — tcard component ─────────────────────────────────── */
+
+.tcard {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #ede8fb;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(139, 92, 246, 0.06);
+  overflow: hidden;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.tcard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.12);
+}
+
+.tcard-head {
+  padding: clamp(1rem, 1.4vw, 1.3rem) clamp(1rem, 1.4vw, 1.3rem) clamp(0.85rem, 1.1vw, 1rem);
+  background: linear-gradient(160deg, #f3f0fd 0%, #fff 65%);
+}
+
+.tcard-head--rose   { background: linear-gradient(160deg, #fdf0f0 0%, #fff 65%); }
+.tcard-head--blue   { background: linear-gradient(160deg, #eef3fd 0%, #fff 65%); }
+.tcard-head--purple { background: linear-gradient(160deg, #f3f0fd 0%, #fff 65%); }
+.tcard-head--sea    { background: linear-gradient(160deg, #eefaf6 0%, #fff 65%); }
+
+.tcard-head-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-block-end: 0.7rem;
+}
+
+.tcard-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tcard-icon img,
+.tcard-icon svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+.tcard-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  white-space: nowrap;
+}
+
+.tcard-badge--chosen   { background: linear-gradient(125deg, #14532d, #166534); color: #fff; }
+.tcard-badge--beginner { background: linear-gradient(125deg, #14532d, #15803d); color: #fff; }
+
+.tcard-title {
+  font-family: var(--font-heading);
+  font-size: var(--type-card);
+  font-weight: 600;
+  color: #131b2e;
+  line-height: 1.25;
+  margin: 0 0 0.35rem;
+}
+
+.tcard-desc {
+  font-family: var(--font-body);
+  font-size: var(--type-caption);
+  color: #6b7280;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.tcard-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.65rem clamp(1rem, 1.4vw, 1.3rem);
+  flex-wrap: wrap;
+}
+
+.tcard-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  color: #6b7280;
+}
+
+.tcard-meta-item strong {
+  color: #374151;
+  font-weight: 600;
+}
+
+.tcard-meta-sep {
+  width: 1px;
+  height: 12px;
+  background: #e5e7eb;
+  flex-shrink: 0;
+}
+
+.tcard-divider {
+  margin: 0 clamp(1rem, 1.4vw, 1.3rem);
+  border-top: 1px dashed #c4b5fd;
+}
+
+.tcard-footer {
+  padding: clamp(0.75rem, 1vw, 1rem) clamp(1rem, 1.4vw, 1.3rem) clamp(1rem, 1.3vw, 1.15rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-block-start: auto;
+}
+
+.tcard-price-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tcard-original {
+  font-family: var(--font-heading);
+  font-size: 0.7rem;
+  color: #aaa;
+  text-decoration: line-through;
+  line-height: 1;
+}
+
+.tcard-price-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tcard-price {
+  font-family: var(--font-heading);
+  font-size: var(--type-price);
+  font-weight: 700;
+  color: #131b2e;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.tcard-discount {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
+  background: #fff3dc;
+  border: 1px solid #f5d98a;
+  color: #92400e;
+  font-family: var(--font-heading);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  white-space: nowrap;
+}
+
+.tcard-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+}
+
+.tcard-btn-outline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e7e1ff;
+  border-radius: 10px;
+  background: #fff;
+  color: #6b38d4;
+  font-family: var(--font-heading);
+  font-size: var(--type-caption);
+  font-weight: 600;
+  padding: 10px 4px;
+  cursor: pointer;
+  transition: border-color 150ms, background 150ms;
+}
+
+.tcard-btn-outline:hover {
+  border-color: #8b5cf6;
+  background: #f3f0fd;
+}
+
+.tcard-btn-fill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 10px;
+  background: #8b5cf6;
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: var(--type-caption);
+  font-weight: 600;
+  padding: 10px 4px;
+  cursor: pointer;
+  transition: background 150ms, box-shadow 150ms;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.tcard-btn-fill:hover {
+  background: #7c3aed;
+  box-shadow: 0 6px 18px rgba(139, 92, 246, 0.42);
+}
+
+/* Mobile: single-card carousel */
+.trending-carousel-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.trending-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+/* Desktop: hide carousel, show 4-col grid */
+.trending-grid-desktop {
+  display: none;
+}
+
+@media (min-width: 48rem) {
+  .trending-carousel-mobile {
+    display: none;
+  }
+
+  .trending-grid-desktop {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+/* ── Responsive overrides ──────────────────────────────────────────────── */
+
+@media (max-width: 47.9375rem) {
+  .gen-test-card-list {
+    gap: 1.5rem;
+  }
+
+  .gen-panel-card {
+    width: clamp(260px, 80vw, 320px);
+  }
+
+  .gen-section-header:not(.gen-section-header--filter) {
+    align-items: center;
+    text-align: center;
+  }
+
+  .gen-section-header--filter {
+    align-items: flex-start;
+    text-align: left;
+  }
 }
 
 .genetic-testing-page .curated-card-title,
@@ -2353,7 +3597,12 @@ a {
   }
 
   .genetic-testing-page .genetic-hero-panel {
+    width: calc(100% - 24px);
     min-height: auto;
+  }
+
+  .genetic-testing-page .genetic-hero-panel::after {
+    display: none;
   }
 
   .genetic-testing-page .genetic-ribbon-panel {
@@ -2657,6 +3906,129 @@ a {
     padding: 0.85rem;
   }
 
+  .genetic-testing-page .genetic-tabs-section {
+    overflow: hidden;
+    border-radius: 0.35rem;
+    background: rgba(250, 248, 255, 0.96);
+    padding-block-start: 0;
+  }
+
+  .genetic-testing-page .genetic-tab-bar {
+    position: static;
+    min-width: 0;
+    margin: 0;
+    border-bottom: 0.0625rem solid rgba(231, 225, 255, 0.88);
+    background: transparent;
+    border-radius: 0;
+    padding: 0 0.9rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+
+  .genetic-testing-page .genetic-tab-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .genetic-testing-page .genetic-tab-btn {
+    flex: 0 0 auto;
+    padding: 1rem 0.9rem 0.72rem;
+    font-size: 0.8125rem;
+    line-height: 1.15;
+  }
+
+  .genetic-testing-page .genetic-tab-btn:first-child {
+    padding-left: 0;
+  }
+
+  .genetic-testing-page .genetic-tab-btn--active {
+    border-bottom-width: 0.125rem;
+  }
+
+  .genetic-testing-page .genetic-mobile-panel-controls {
+    display: block;
+    padding: 1.18rem 0.9rem 1rem;
+  }
+
+  .genetic-testing-page .genetic-mobile-panel-search {
+    display: flex;
+    align-items: center;
+    gap: 0.72rem;
+    width: 100%;
+    height: 3rem;
+    border: 0.0625rem solid rgba(203, 195, 215, 0.5);
+    border-radius: 999rem;
+    background: #ffffff;
+    color: #8b8497;
+    padding-inline: 1.18rem;
+    box-shadow: 0 0.22rem 1.25rem rgba(139, 92, 246, 0.04);
+  }
+
+  .genetic-testing-page .genetic-mobile-panel-search svg {
+    flex: 0 0 auto;
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .genetic-testing-page .genetic-mobile-panel-search input {
+    min-width: 0;
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #494454;
+    font-family: var(--font-heading);
+    font-size: 0.875rem;
+    line-height: 1.2;
+  }
+
+  .genetic-testing-page .genetic-mobile-panel-search input::placeholder {
+    color: #8b8497;
+    opacity: 1;
+  }
+
+  .genetic-testing-page .genetic-mobile-panel-chips {
+    display: flex;
+    gap: 0.74rem;
+    margin-block-start: 1.08rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-block-end: 0.48rem;
+    scrollbar-width: none;
+  }
+
+  .genetic-testing-page .genetic-mobile-panel-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .genetic-testing-page .genetic-mobile-panel-chip {
+    flex: 0 0 auto;
+    min-height: 2.3rem;
+    border: 0.0625rem solid #e7e1ff;
+    border-radius: 999rem;
+    background: #ffffff;
+    color: #494454;
+    padding: 0.58rem 1.12rem;
+    font-family: var(--font-heading);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    box-shadow: 0 0.18rem 0.95rem rgba(31, 31, 68, 0.035);
+  }
+
+  .genetic-testing-page .genetic-mobile-panel-chip--active {
+    border-color: #8b55f6;
+    background: #8b55f6;
+    color: #ffffff;
+    box-shadow: 0 0.52rem 1rem rgba(139, 85, 246, 0.24);
+  }
+
+  .genetic-testing-page .genetic-tab-content {
+    padding-block-start: 1.38rem;
+    background: #ffffff;
+  }
+
   .genetic-testing-page .sticky.top-\[5rem\] {
     padding-inline: 0.5rem;
   }
@@ -2732,8 +4104,13 @@ a {
     padding: 1.18rem !important;
   }
 
-  .genetic-testing-page .genetic-recommended-section {
+  .genetic-testing-page .genetic-recommended-section,
+  .genetic-testing-page .genetic-tabs-section {
     padding-block-start: 0;
+  }
+
+  .genetic-testing-page .genetic-tabs-section .genetic-explore-scroll {
+    padding-inline: 0;
   }
 
   .genetic-testing-page .genetic-recommended-section > div:first-child {
@@ -2933,6 +4310,16 @@ a {
     padding: 1rem 1.25rem;
   }
 
+  .genetic-testing-page .panel-detail-modal {
+    height: 80dvh;
+    max-height: 80dvh;
+  }
+
+  .genetic-testing-page .panel-detail-title {
+    overflow-wrap: break-word;
+    word-break: normal;
+  }
+
   .genetic-testing-page .panel-highlight-grid,
   .genetic-testing-page .panel-conditions-list {
     grid-template-columns: minmax(0, 1fr);
@@ -2941,6 +4328,105 @@ a {
   .genetic-testing-page .type-body,
   .genetic-testing-page .type-body-sm {
     line-height: 1.45;
+  }
+
+  /* ── Card typography — match bloodtest mobile specs ── */
+  @media (max-width: 40rem) {
+    .genetic-testing-page .panel-detail-header {
+      padding: max(0.85rem, env(safe-area-inset-top)) 1rem 0.8rem;
+    }
+
+    .genetic-testing-page .panel-detail-heading-row {
+      gap: 0.72rem;
+    }
+
+    .genetic-testing-page .panel-detail-badges {
+      gap: 0.45rem;
+      margin-block-start: 0.7rem;
+    }
+
+    .genetic-testing-page .panel-detail-close {
+      width: 2.15rem;
+      margin-block-start: -0.1rem;
+      margin-inline-end: -0.15rem;
+    }
+
+    .genetic-testing-page .panel-detail-content {
+      padding: 0.95rem 1rem 1.05rem;
+    }
+
+    .genetic-testing-page .panel-detail-section h3,
+    .genetic-testing-page .panel-included-section h3 {
+      font-size: 1rem;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+    }
+
+    .genetic-testing-page .panel-detail-footer {
+      gap: 0.45rem;
+      padding: 0.55rem 1rem calc(0.55rem + env(safe-area-inset-bottom));
+    }
+
+    .genetic-testing-page .panel-detail-price {
+      font-size: 1.15rem;
+      line-height: 1;
+    }
+
+    .genetic-testing-page .panel-trust-row {
+      gap: 0.35rem;
+      margin-block-start: 0.25rem;
+    }
+
+    .genetic-testing-page .panel-trust-row span {
+      font-size: 0.62rem;
+      padding: 0.2rem 0.45rem;
+    }
+
+    .genetic-testing-page .panel-detail-add {
+      min-height: 2.35rem;
+      border-radius: 0.65rem;
+      font-size: 0.92rem;
+    }
+  }
+
+  .genetic-testing-page .gen-card-title {
+    font-family: Poppins, sans-serif;
+    font-size: 20px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.02em !important;
+  }
+
+  .genetic-testing-page .gen-card-description {
+    font-family: Inter, sans-serif;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    line-height: 1.45 !important;
+  }
+
+  /* ── Section title + paragraph — match bloodtest mobile specs ── */
+  .genetic-testing-page .panel-detail-title {
+    color: #101129;
+    font-size: clamp(1.35rem, 6vw, 1.65rem) !important;
+    font-weight: 600;
+    line-height: 1.18;
+    letter-spacing: 0;
+  }
+
+  .genetic-testing-page .type-section-title {
+    font-family: Poppins, sans-serif;
+    font-size: 24px !important;
+    font-weight: 500 !important;
+    line-height: 1 !important;
+    letter-spacing: -0.03em !important;
+  }
+
+  .genetic-testing-page .genetic-ribbon-copy,
+  .genetic-testing-page .type-body {
+    font-family: Inter, sans-serif;
+    font-size: 16px !important;
+    font-weight: 400 !important;
+    line-height: 27px !important;
   }
 
   .genetic-testing-page .genetic-content-stack {
@@ -3728,11 +5214,28 @@ a {
 
 @media (max-width: 48rem) {
   .genetic-testing-page {
-    --type-hero: 1.42rem;
-    --type-section: 1.08rem;
+    --type-hero: clamp(32px, 14vmin, 60px);
+    --type-page: clamp(28px, 10.5vw, 48px);
+    --type-section: clamp(28px, 10.5vw, 48px);
+    --type-card: min(24px, 6.5vw);
+    --type-body: 18px;
+    --type-body-sm: 18px;
+    --type-caption: clamp(14px, 3.8vw, 18px);
+    --type-eyebrow: 12px;
+    --type-price: min(24px, 6.5vw);
+    --lh-section: 1.270833;
+    --lh-body: 1.5;
+    --lh-ui: 1.3;
+    --m-pad-page-x: clamp(12px, 4vw, 16px);
+    --m-pad-card: clamp(16px, 4.8vw, 20px);
+    --m-gap-1: clamp(8px, 2.8vw, 12px);
+    --m-gap-2: clamp(12px, 4vw, 16px);
+    --m-gap-section: clamp(20px, 5vw, 32px);
     --genetic-page-x: 12px;
     --genetic-page-top: 0.85rem;
-    --genetic-stack-gap: 1rem;
+    --genetic-stack-gap: var(--m-gap-section);
+    --genetic-card-gap: var(--m-gap-2);
+    --genetic-card-pad: var(--m-pad-card);
     background: #f8f6ff;
   }
 
@@ -4074,5 +5577,805 @@ a {
 
   .genetic-testing-page header button:last-child {
     padding-inline: 0.68rem;
+  }
+}
+
+/* ── Most Popular Categories — OrangeHealth style ─────────── */
+.genetic-testing-page .popcats-section {
+  background: linear-gradient(150deg, #ffffff 0%, #f3f0fd 45%, #edeaff 100%);
+  border-top: 1px solid rgba(197, 185, 242, 0.4);
+  border-bottom: 1px solid rgba(197, 185, 242, 0.4);
+  border-radius: 16px;
+  padding-block: clamp(1.25rem, 1.8vw, 1.75rem);
+  padding-inline: clamp(1rem, 2vw, 2rem);
+  margin-inline: auto;
+}
+
+/* Eyebrow label row */
+.genetic-testing-page .popcats-oh-label {
+  margin-block-end: clamp(0.85rem, 1.2vw, 1.1rem);
+}
+
+.genetic-testing-page .popcats-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #6b38d4;
+}
+
+/* Main body: card left + headline right + arrows */
+.genetic-testing-page .popcats-oh-body {
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 2vw, 2rem);
+}
+
+/* Arrows */
+.genetic-testing-page .popcats-oh-arrow {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid rgba(203, 195, 215, 0.7);
+  color: #494454;
+  box-shadow: 0 2px 8px rgba(107, 56, 212, 0.08);
+  cursor: pointer;
+  transition: background 150ms, border-color 150ms, box-shadow 150ms;
+}
+
+.genetic-testing-page .popcats-oh-arrow:hover {
+  background: #f0ebff;
+  border-color: #8b5cf6;
+  color: #6b38d4;
+  box-shadow: 0 4px 14px rgba(107, 56, 212, 0.15);
+}
+
+/* Left: dark card */
+.genetic-testing-page .popcats-oh-card {
+  flex: 0 0 clamp(240px, 30vw, 320px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  background: linear-gradient(135deg, #14152e 0%, #2b2d60 100%);
+  border-radius: 16px;
+  padding: clamp(1rem, 1.5vw, 1.35rem);
+  min-height: clamp(180px, 22vw, 230px);
+  box-shadow: 0 8px 32px rgba(16, 17, 41, 0.22);
+}
+
+.genetic-testing-page .popcats-oh-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.genetic-testing-page .popcats-oh-markers {
+  font-family: var(--font-heading);
+  font-size: var(--type-caption);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.04em;
+}
+
+.genetic-testing-page .popcats-oh-card-mid {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.genetic-testing-page .popcats-oh-icon-circle {
+  display: grid;
+  place-items: center;
+  width: clamp(44px, 5.5vmin, 54px);
+  height: clamp(44px, 5.5vmin, 54px);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.genetic-testing-page .popcats-oh-card-title {
+  font-family: var(--font-heading);
+  font-size: var(--type-card);
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.genetic-testing-page .popcats-oh-stat {
+  font-family: var(--font-heading);
+  font-size: var(--type-caption);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  margin-block-start: 0.2rem;
+}
+
+.genetic-testing-page .popcats-oh-card-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.genetic-testing-page .popcats-oh-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+}
+
+.genetic-testing-page .popcats-oh-price {
+  font-family: var(--font-heading);
+  font-size: var(--type-price);
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.genetic-testing-page .popcats-oh-original {
+  font-family: var(--font-heading);
+  font-size: var(--type-caption);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.4);
+  text-decoration: line-through;
+}
+
+.genetic-testing-page .popcats-oh-discount {
+  font-family: var(--font-heading);
+  font-size: var(--type-caption);
+  font-weight: 700;
+  color: #a3e635;
+  background: rgba(163, 230, 53, 0.12);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+
+.genetic-testing-page .popcats-oh-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.genetic-testing-page .popcats-oh-btn-secondary {
+  flex: 1;
+  font-family: var(--font-heading);
+  font-size: var(--type-caption);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+  transition: background 150ms, border-color 150ms;
+  white-space: nowrap;
+}
+
+.genetic-testing-page .popcats-oh-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.genetic-testing-page .popcats-oh-btn-primary {
+  flex: 1;
+  font-family: var(--font-heading);
+  font-size: var(--type-caption);
+  font-weight: 700;
+  color: #ffffff;
+  background: #8b5cf6;
+  border: none;
+  border-radius: 8px;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+  transition: background 150ms, box-shadow 150ms;
+  white-space: nowrap;
+}
+
+.genetic-testing-page .popcats-oh-btn-primary:hover {
+  background: #7c3aed;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
+}
+
+/* Right: headline + description */
+.genetic-testing-page .popcats-oh-right {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.genetic-testing-page .popcats-oh-headline {
+  font-family: var(--font-heading);
+  font-size: clamp(1.35rem, 2.2vw, 1.85rem);
+  font-weight: 700;
+  color: #101129;
+  line-height: 1.2;
+}
+
+.genetic-testing-page .popcats-oh-desc {
+  font-family: var(--font-heading);
+  font-size: var(--type-body);
+  font-weight: 400;
+  color: #494454;
+  line-height: 1.55;
+  max-width: 36ch;
+}
+
+.genetic-testing-page .popcats-oh-trust {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-block-start: 0.25rem;
+}
+
+.genetic-testing-page .popcats-oh-trust-icon {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: #f3f0fd;
+  color: #6b38d4;
+  flex-shrink: 0;
+}
+
+.genetic-testing-page .popcats-oh-trust-title {
+  font-family: var(--font-heading);
+  font-size: var(--type-body-sm);
+  font-weight: 700;
+  color: #161616;
+}
+
+.genetic-testing-page .popcats-oh-trust-sub {
+  font-family: var(--font-heading);
+  font-size: var(--type-caption);
+  font-weight: 500;
+  color: #7b7486;
+}
+
+/* Dot indicators */
+.genetic-testing-page .popcats-oh-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.45rem;
+  margin-block-start: clamp(0.75rem, 1vw, 1rem);
+}
+
+.genetic-testing-page .popcats-oh-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: #d4cce8;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: background 200ms, width 200ms;
+}
+
+.genetic-testing-page .popcats-oh-dot--active {
+  background: #8b5cf6;
+  width: 1.5rem;
+  border-radius: 999px;
+}
+
+/* Badge pills (shared) */
+.genetic-testing-page .popcats-pill-badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-family: var(--font-heading);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.genetic-testing-page .popcats-badge--chosen {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+}
+
+.genetic-testing-page .popcats-badge--rose {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+}
+
+.genetic-testing-page .popcats-badge--sea {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+}
+
+.genetic-testing-page .popcats-badge--purple {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+}
+
+.genetic-testing-page .popcats-badge--blue {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+}
+
+/* Mobile */
+@media (max-width: 48rem) {
+  .genetic-testing-page .popcats-section {
+    padding-inline: 1rem;
+    border-radius: 12px;
+  }
+
+  .genetic-testing-page .popcats-oh-body {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .genetic-testing-page .popcats-oh-card {
+    flex: none;
+    width: 100%;
+  }
+
+  .genetic-testing-page .popcats-oh-arrow {
+    display: none;
+  }
+
+  .genetic-testing-page .popcats-oh-headline {
+    font-size: clamp(1.15rem, 5vw, 1.5rem);
+  }
+
+  .genetic-testing-page .popcats-oh-desc {
+    max-width: 100%;
+  }
+}
+
+/* ── Cart overlay (fixed, slides in when items added) ─────── */
+.genetic-testing-page .cart-panel {
+  position: fixed !important;
+  bottom: 2rem;
+  right: 2rem;
+  width: 22rem;
+  z-index: 60;
+  top: auto !important;
+  transform: translateY(calc(100% + 3rem));
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 380ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 280ms ease;
+}
+
+.genetic-testing-page .cart-panel.cart-panel--visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (max-width: 48rem) {
+  .genetic-testing-page .cart-panel {
+    bottom: 0;
+    right: 0;
+    left: 0;
+    width: 100%;
+    border-radius: 1.25rem 1.25rem 0 0 !important;
+    transform: translateY(100%);
+  }
+}
+
+@media (max-width: 48rem) {
+  .genetic-testing-page {
+    --type-hero: clamp(32px, 14vmin, 60px);
+    --type-page: clamp(28px, 10.5vw, 48px);
+    --type-section: clamp(28px, 10.5vw, 48px);
+    --type-card: min(24px, 6.5vw);
+    --type-body: 18px;
+    --type-body-sm: 18px;
+    --type-caption: clamp(14px, 3.8vw, 18px);
+    --type-eyebrow: 12px;
+    --type-price: min(24px, 6.5vw);
+    --lh-section: 1.270833;
+    --lh-body: 1.5;
+    --lh-ui: 1.3;
+    --m-pad-page-x: clamp(12px, 4vw, 16px);
+    --m-pad-card: clamp(16px, 4.8vw, 20px);
+    --m-gap-1: clamp(8px, 2.8vw, 12px);
+    --m-gap-2: clamp(12px, 4vw, 16px);
+    --m-gap-section: clamp(20px, 5vw, 32px);
+    --genetic-page-x: var(--m-pad-page-x);
+    --genetic-stack-gap: var(--m-gap-section);
+    --genetic-card-gap: var(--m-gap-2);
+    --genetic-card-pad: var(--m-pad-card);
+  }
+
+  .genetic-testing-page h1,
+  .genetic-testing-page .type-hero-title {
+    color: #101129;
+    font-family: Poppins, sans-serif;
+    font-size: var(--type-hero);
+    font-weight: 500;
+    line-height: 1.14;
+    letter-spacing: -0.03em;
+  }
+
+  .genetic-testing-page h2,
+  .genetic-testing-page .type-page-title,
+  .genetic-testing-page .recommended-panels-title {
+    color: #101129;
+    font-family: Poppins, sans-serif;
+    font-size: var(--type-section);
+    font-weight: 500;
+    line-height: var(--lh-section);
+    letter-spacing: -0.03em;
+  }
+
+  /* Section titles — bloodtest mobile spec: 24px / lh 1 / 500 */
+  .genetic-testing-page .type-section-title {
+    color: #101129;
+    font-family: Poppins, sans-serif;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  /* Card titles (h3) — bloodtest mobile spec: 20px / lh 1.2 / 600 */
+  .genetic-testing-page h3,
+  .genetic-testing-page .gen-card-title,
+  .genetic-testing-page .gen-panel-title,
+  .genetic-testing-page .curated-bento-title {
+    color: #101129;
+    font-family: Poppins, sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .genetic-testing-page .type-card-title,
+  .genetic-testing-page .curated-card-title,
+  .genetic-testing-page .genetic-category-card .type-card-title,
+  .genetic-testing-page .faq-item {
+    font-family: Poppins, sans-serif;
+    font-size: var(--type-card);
+    font-weight: 500;
+    line-height: 27px;
+    letter-spacing: -0.03em;
+  }
+
+  .genetic-testing-page .type-body,
+  .genetic-testing-page .type-body-sm,
+  .genetic-testing-page .genetic-ribbon-copy,
+  .genetic-testing-page .gen-section-subtitle,
+  .genetic-testing-page .curated-card-description,
+  .genetic-testing-page .genetic-category-card .type-body-sm {
+    font-family: Inter, sans-serif;
+    font-size: var(--type-body);
+    font-weight: 400;
+    line-height: 27px;
+    letter-spacing: 0;
+  }
+
+  /* Card paragraph — bloodtest mobile spec: 12px / lh 1.45 / 400 / Inter */
+  .genetic-testing-page .gen-card-description,
+  .genetic-testing-page .gen-panel-description {
+    font-family: Inter, sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.45;
+    color: #828282;
+  }
+
+  .genetic-testing-page .gen-section-subtitle {
+    color: #6c6c6c;
+    margin: 0;
+  }
+
+  .genetic-testing-page .gen-card-description,
+  .genetic-testing-page .gen-panel-description {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .genetic-testing-page .type-button,
+  .genetic-testing-page .type-ui,
+  .genetic-testing-page .type-chip,
+  .genetic-testing-page .type-caption,
+  .genetic-testing-page .curated-add-button,
+  .genetic-testing-page .recommended-view-all,
+  .genetic-testing-page .gen-view-all-link {
+    font-family: Poppins, sans-serif;
+    font-size: var(--type-caption);
+    font-weight: 500;
+    line-height: var(--lh-ui);
+  }
+
+  .genetic-testing-page .type-price,
+  .genetic-testing-page .curated-current-price,
+  .genetic-testing-page .genetic-category-card .type-price {
+    font-family: Poppins, sans-serif;
+    font-size: var(--type-price);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.035em;
+  }
+
+  .genetic-testing-page .type-eyebrow,
+  .genetic-testing-page .curated-card-badge,
+  .genetic-testing-page .curated-saving {
+    font-family: Poppins, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 20px;
+  }
+
+  .genetic-testing-page .genetic-testing-main {
+    padding: 1rem var(--m-pad-page-x) 2.5rem !important;
+  }
+
+  .genetic-mobile-discovery {
+    gap: var(--m-gap-1);
+    padding: 12px var(--m-pad-page-x) 14px;
+  }
+
+  .genetic-mobile-location {
+    font-family: Inter, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 27px;
+  }
+
+  .genetic-mobile-search {
+    height: 50px;
+    padding: 0 7px 0 16px;
+  }
+
+  .genetic-mobile-search input {
+    font-family: Poppins, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 27px;
+  }
+
+  .genetic-testing-page .genetic-content-stack,
+  .genetic-testing-page .genetic-shell-grid {
+    gap: var(--m-gap-section);
+  }
+
+  .genetic-testing-page .gen-section-header {
+    gap: 8px;
+    margin-block-end: var(--m-gap-2);
+  }
+
+  .genetic-testing-page .genetic-section-block + .genetic-section-block {
+    margin-block-start: var(--m-gap-section);
+  }
+
+  .genetic-testing-page .genetic-card-grid,
+  .genetic-testing-page .curated-package-grid,
+  .genetic-testing-page .curated-bento-grid,
+  .gen-test-card-list,
+  .genetic-testing-page .faq-list {
+    gap: var(--m-gap-2);
+  }
+
+  .genetic-testing-page .genetic-category-card,
+  .genetic-testing-page .curated-package-card,
+  .genetic-testing-page .curated-bento-card,
+  .genetic-testing-page .curated-premium-card,
+  .genetic-testing-page .curated-premium-card--compact,
+  .genetic-testing-page .cart-panel--empty,
+  .genetic-testing-page .cart-panel--selected {
+    padding: var(--m-pad-card) !important;
+  }
+
+  .genetic-testing-page .curated-card-copy-stack,
+  .genetic-testing-page .genetic-ribbon-copy-stack {
+    gap: var(--m-gap-1);
+  }
+
+  .genetic-testing-page .curated-card-header,
+  .genetic-testing-page .curated-card-footer {
+    margin-block-end: var(--m-gap-2);
+  }
+
+  .genetic-testing-page .curated-card-footer {
+    padding-block-start: var(--m-gap-2);
+  }
+
+  .genetic-testing-page .curated-card-actions {
+    gap: var(--m-gap-1);
+  }
+
+  .genetic-testing-page .curated-add-button,
+  .genetic-testing-page .cart-mobile-empty-card .cart-checkout-button,
+  .genetic-testing-page .cart-panel--selected > .cart-checkout-button {
+    min-height: 50px;
+    padding-inline: 12px;
+  }
+
+  .genetic-testing-page .faq-item {
+    padding: clamp(16px, 4.8vw, 20px);
+  }
+}
+
+@media (max-width: 48rem) {
+  .genetic-testing-page .genetic-hero-wrapper,
+  .genetic-testing-page .genetic-hero-panel,
+  .genetic-testing-page .genetic-tabs-section {
+    width: 100%;
+    margin-inline: 0;
+  }
+
+  .genetic-testing-page .genetic-tab-bar {
+    gap: 0.72rem;
+    padding-inline: 0.9rem;
+  }
+
+  .genetic-testing-page .genetic-tab-btn {
+    flex: 0 0 auto;
+    min-width: 0;
+    padding-inline: 0;
+    text-align: center;
+  }
+
+  .genetic-testing-page .genetic-tab-btn:first-child {
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 48rem) {
+  .genetic-testing-page .genetic-hero-trust-row {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-inline: 0.25rem;
+    padding-block-end: 0.15rem;
+    scroll-padding-inline: 0.25rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .genetic-testing-page .genetic-hero-trust-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .genetic-testing-page .hero-badge {
+    flex: 0 0 auto;
+    width: auto;
+    min-height: 2rem;
+    justify-content: center;
+    gap: 0.34rem;
+    padding: 0.4rem 0.58rem;
+    font-size: 0.68rem;
+    line-height: 1.15;
+    text-align: center;
+  }
+
+  .genetic-testing-page .hero-badge:nth-child(1),
+  .genetic-testing-page .hero-badge:nth-child(2) {
+    width: auto;
+  }
+
+  .genetic-testing-page .hero-badge-icon-wrap {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+@media (max-width: 48rem) {
+  .genetic-testing-page {
+    background: #ffffff;
+  }
+
+  .genetic-testing-page .genetic-hero-wrapper {
+    background: #ffffff;
+  }
+
+  .genetic-testing-page .genetic-tabs-section {
+    --genetic-mobile-panel-x: 0.72rem;
+    --genetic-mobile-container-x: 0rem;
+    overflow: visible;
+    border-radius: 0;
+    background: #ffffff;
+  }
+
+  .genetic-testing-page .genetic-tab-bar {
+    margin-inline: var(--genetic-mobile-container-x);
+    border-radius: 0.72rem 0.72rem 0 0;
+    background: #faf8ff;
+    padding-inline: var(--genetic-mobile-panel-x);
+    box-shadow: 0 0.65rem 1.5rem rgba(75, 55, 130, 0.045);
+  }
+
+  .genetic-testing-page .genetic-mobile-panel-controls {
+    margin-inline: var(--genetic-mobile-container-x);
+    border-radius: 0 0 0.72rem 0.72rem;
+    padding: 1.05rem var(--genetic-mobile-panel-x) 0.9rem;
+    background: #faf8ff;
+  }
+
+  .genetic-testing-page .genetic-mobile-panel-search {
+    width: 100%;
+    height: 2.95rem;
+    box-sizing: border-box;
+    border-color: rgba(203, 195, 215, 0.58);
+    background: #ffffff;
+    padding-inline: 1.05rem;
+  }
+
+  .genetic-testing-page .genetic-mobile-panel-chips {
+    width: 100%;
+    margin: 0.92rem 0 0;
+    padding: 0 0 0.2rem;
+    scroll-padding-inline: 0;
+  }
+
+  .genetic-testing-page .genetic-mobile-panel-chip {
+    min-height: 2.18rem;
+    padding: 0.54rem 1rem;
+  }
+
+  .genetic-testing-page .sticky.top-\[5rem\] {
+    margin-inline: var(--genetic-mobile-container-x);
+    border: 0;
+    border-radius: 0.72rem;
+    background: #faf8ff;
+    padding: 0 !important;
+    box-shadow: none;
+    overflow: hidden;
+  }
+
+  .genetic-testing-page .sticky.top-\[5rem\] > .type-caption {
+    margin-inline: 0;
+    padding-inline: var(--genetic-mobile-panel-x);
+  }
+
+  .genetic-testing-page .sticky.top-\[5rem\] > div:nth-child(2) {
+    padding: 1.05rem var(--genetic-mobile-panel-x) 0 !important;
+  }
+
+  .genetic-testing-page .sticky.top-\[5rem\] label {
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+  }
+
+  .genetic-testing-page .sticky-category-chips {
+    margin: 0.92rem 0 0;
+    padding: 0 var(--genetic-mobile-panel-x) 0.9rem;
+    scroll-padding-inline: var(--genetic-mobile-panel-x);
+  }
+
+  .genetic-testing-page .build-panel-recommended {
+    margin-top: 2.15rem;
+    gap: 0.72rem;
+  }
+
+  .genetic-testing-page .build-panel-section-head {
+    margin-bottom: 0;
+  }
+
+  .genetic-testing-page .build-panel-recommended .gen-recommended-scroll {
+    padding-block-start: 0.25rem;
+  }
+
+  .genetic-testing-page .build-panel-section-head .gen-section-subtitle {
+    max-width: none;
+    width: 100%;
+  }
+
+  .genetic-testing-page .gen-card-description,
+  .genetic-testing-page .gen-panel-description {
+    font-size: 14px !important;
+    line-height: 1.5 !important;
   }
 }
