@@ -1,6 +1,19 @@
+X [ERROR] Cannot read directory "..": Access is denied.
+
+X [ERROR] Could not resolve "C:\\Users\\shett\\Nucleotide_Genetics_frontend\\vite.config.js"
+
+[31mfailed to load config from C:\Users\shett\Nucleotide_Genetics_frontend\vite.config.js[39m
 [31merror when starting dev server:
-Error: Port 3002 is already in use
-    at Server.onError$1 (file:///C:/Users/shett/Nucleotide_Genetics_frontend/node_modules/vite/dist/node/chunks/config.js:14949:28)
-    at Server.emit (node:events:508:20)
-    at emitErrorNT (node:net:2044:8)
-    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)[39m
+Error: Build failed with 2 errors:
+error: Cannot read directory "..": Access is denied.
+error: Could not resolve "C:\\Users\\shett\\Nucleotide_Genetics_frontend\\vite.config.js"
+    at failureErrorWithLog (C:\Users\shett\Nucleotide_Genetics_frontend\node_modules\esbuild\lib\main.js:1748:15)
+    at C:\Users\shett\Nucleotide_Genetics_frontend\node_modules\esbuild\lib\main.js:1207:25
+    at runOnEndCallbacks (C:\Users\shett\Nucleotide_Genetics_frontend\node_modules\esbuild\lib\main.js:1588:45)
+    at buildResponseToResult (C:\Users\shett\Nucleotide_Genetics_frontend\node_modules\esbuild\lib\main.js:1205:7)
+    at C:\Users\shett\Nucleotide_Genetics_frontend\node_modules\esbuild\lib\main.js:1232:16
+    at responseCallbacks.<computed> (C:\Users\shett\Nucleotide_Genetics_frontend\node_modules\esbuild\lib\main.js:884:9)
+    at handleIncomingPacket (C:\Users\shett\Nucleotide_Genetics_frontend\node_modules\esbuild\lib\main.js:939:12)
+    at Socket.readFromStdout (C:\Users\shett\Nucleotide_Genetics_frontend\node_modules\esbuild\lib\main.js:862:7)
+    at Socket.emit (node:events:508:20)
+    at addChunk (node:internal/streams/readable:564:12)[39m

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "../../bloodtest/components/Navbar/Navbar";
@@ -32,13 +32,16 @@ import curatedSportsIcon from "../assets/Genetics/curated-packages/Icon-11.svg";
 import curatedChildIcon from "../assets/Genetics/curated-packages/material-symbols_sports-handball.svg";
 import curatedFamilyIcon from "../assets/Genetics/curated-packages/Icon-9.svg";
 import curatedHairIcon from "../assets/Genetics/curated-packages/streamline-ultimate_hair-skin-bold.svg";
+import curatedCardioIcon from "../assets/Genetics/curated-packages/Icon-8.svg";
 import badgeCertifiedIcon from "../assets/Genetics/Vector (1).svg";
 import badgeReportIcon from "../assets/Genetics/Vector (2).svg";
 import badgeVerifiedIcon from "../assets/Genetics/Icon-6.svg";
 import badgeSecureIcon from "../assets/Genetics/Icon-11.svg";
+import howWorksDecoA from "../../bloodtest/assets/figma/Rectangle 20.png";
+import howWorksDecoB from "../../bloodtest/assets/figma/Rectangle 19.png";
 
 const categories = ["All Categories", "Most Popular", "New Additions", "Cancer Risk"];
-const sectionTabs = ["Build Your Panel", "Curated Packages", "How It Works"];
+const sectionTabs = ["Build Your Panel", "Curated Packages"];
 const panelTabs = ["All Categories", "Most Popular", "Preventive Care", "Longevity", "Hormones", "Fitness", "Family Planning", "Mental Wellness"];
 const filterGroups = [
   {
@@ -779,10 +782,10 @@ function StickyControls({ activeSectionTab, onSectionTabChange, showBuildFilters
               aria-pressed={isActive}
               onClick={() => onSectionTabChange(tab)}
               className={[
-                "shrink-0 border-b-2 px-0 pb-3 text-left transition-colors duration-150",
+                "shrink-0 rounded-full border px-4 py-2 transition-colors duration-150",
                 isActive
-                  ? "border-[#6b38d4] text-[#6b38d4]"
-                  : "border-transparent text-[#494454] hover:border-[#d3c4f4] hover:text-[#6b38d4]",
+                  ? "border-nucleotide-purple bg-nucleotide-purple text-white shadow-[0_0.45rem_1rem_rgba(139,92,246,0.24)]"
+                  : "border-transparent text-[#494454] hover:border-nucleotide-purple/40 hover:text-nucleotide-purple",
               ].join(" ")}
             >
               {tab}
@@ -1059,7 +1062,6 @@ function GeneticTestCard({ card, onOpen, onAddPanel }) {
     <article className="gen-test-card" onClick={() => onOpen(card)} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && onOpen(card)}>
       {card.overlayBadge && (
         <span className={`gen-card-overlay-badge gen-card-overlay-badge--${card.overlayBadge.variant}`}>
-          {card.overlayBadge.variant === "chosen" ? <StarIcon /> : <LeafIcon />}
           {card.overlayBadge.label}
         </span>
       )}
@@ -1234,51 +1236,64 @@ function PanelDetailModal({ card, onAddPanel, onClose }) {
 }
 
 function CuratedPackageCard({ card, onAddPanel }) {
+  const badgeBgMap = {
+    sea: "#41c9b3",
+    purple: "#8b5cf6",
+    blue: "#3b82f6",
+    orange: "#ea8c5a",
+    rose: "#e12d2d",
+  };
+
   return (
-    <article className="curated-bento-card">
-      <div className="curated-bento-header">
-        <span className={`curated-bento-icon curated-bento-tone-${card.tone}`}>
-          <PackageIcon name={card.icon} />
-        </span>
-        <span className={`curated-bento-badge curated-bento-badge-${card.tone}`}>{card.badge}</span>
+    <article className="gen-panel-card">
+      <div className="gen-panel-inner-top">
+        <div className="gen-panel-top-row">
+          <span className={`gen-panel-icon-circle genetic-tone-${card.tone}`}>
+            <img src={card.icon} alt="" />
+          </span>
+          <span
+            className="gen-panel-badge-pill"
+            style={{ background: badgeBgMap[card.tone] || "#8b5cf6", color: "#fff", border: "none" }}
+          >
+            {card.badge}
+          </span>
+        </div>
+        <h3 className="gen-panel-title">{card.title}</h3>
+        <p className="gen-panel-description">{card.text}</p>
       </div>
-      <div>
-        <h3 className="curated-bento-title">{card.title}</h3>
-        <p className="curated-bento-copy">{card.text}</p>
+      <div className="gen-panel-body">
+        <div className="gen-panel-chips">
+          {card.tags.map((tag) => (
+            <span key={tag} className="gen-panel-chip">{tag}</span>
+          ))}
+        </div>
       </div>
-      <div className="curated-bento-tags">
-        {card.tags.map((tag) => (
-          <span key={tag}>{tag}</span>
-        ))}
-      </div>
-      <div className="curated-bento-footer">
-        <div>
-          <p className="curated-bento-original">₹24,500</p>
-          <div className="flex flex-wrap items-end gap-2">
-            <p className="curated-bento-price">₹20,000</p>
-            <p className="curated-bento-save">Save ₹4,500</p>
-          </div>
+      <div className="gen-card-divider" aria-hidden="true" />
+      <div className="gen-panel-footer">
+        <div className="gen-panel-price-stack">
+          <span className="gen-panel-original">₹24,500</span>
+          <span className="gen-panel-price">₹20,000</span>
+          <span className="gen-panel-save">Save ₹4,500</span>
         </div>
         <button
           type="button"
-          className="curated-add-button"
+          className="gen-panel-cta"
           onClick={() => onAddPanel?.({
             title: card.title,
             text: card.text,
-            price: "\u20B920,000",
+            price: "₹20,000",
             tone: card.tone,
             icon: card.icon,
             chips: card.tags.slice(0, 3),
           })}
         >
-          <img src={addIcon} alt="" className="w-4" />
+          <img src={addIcon} alt="" aria-hidden="true" />
           Add to Panel
         </button>
       </div>
     </article>
   );
 }
-
 function FilterSheet({ groups = filterGroups, activeTab, onSelect, onClose }) {
   const initialGroupLabel = groups.find((group) => group.label === activeTab || group.subcategories.includes(activeTab))?.label || groups[0].label;
   const [selectedGroupLabel, setSelectedGroupLabel] = useState(initialGroupLabel);
@@ -1448,31 +1463,13 @@ function PackageFilterChips({ activeTab, onTabChange }) {
 }
 
 function CuratedPackagesView({ onAddPanel }) {
-  const [activeTab, setActiveTab] = useState(panelTabs[0]);
-  const [showFilter, setShowFilter] = useState(false);
-
   return (
-    <section className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <h2 className="type-section-title text-[#131b2e]">Select Packages</h2>
-        <FilterButton onClick={() => setShowFilter(true)} />
-      </div>
-      <PackageFilterChips
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-      />
+    <section className="curated-packages-view">
       <div className="curated-bento-grid">
         {curatedPackageCards.map((card) => (
           <CuratedPackageCard key={card.title} card={card} onAddPanel={onAddPanel} />
         ))}
       </div>
-      {showFilter && (
-        <FilterSheet
-          activeTab={activeTab}
-          onSelect={setActiveTab}
-          onClose={() => setShowFilter(false)}
-        />
-      )}
     </section>
   );
 }
@@ -1680,180 +1677,147 @@ function buildGeneticCheckoutSession(selectedPanels) {
   };
 }
 
-function CartAside({ selectedPanels, onRemovePanel, onAddPanel, onCheckout, visible }) {
+function FloatingCart({ selectedPanels, onRemovePanel, onCheckout }) {
+  const [expanded, setExpanded] = useState(false);
+  const [badgeKey, setBadgeKey] = useState(0);
+  const prevCount = useRef(selectedPanels.length);
   const selectedCount = selectedPanels.length;
   const subtotal = selectedPanels.reduce((sum, panel) => sum + getPanelPriceValue(panel), 0);
-  const progress = selectedCount > 0 ? Math.min((subtotal / minimumCheckoutTotal) * 100, 100) : 0;
-  const isReady = subtotal >= minimumCheckoutTotal;
-  const progressLabel = selectedCount === 0 ? "0/1" : `${selectedCount}/1`;
-  const primaryPanel = selectedPanels[0] || featuredPanelCartItem;
-  const primaryPanelCopy = primaryPanel.text || "Clinical-grade genomic screening added to your selection.";
-  const primaryPanelChips = primaryPanel.chips || ["Selected Panel", "Clinical Grade", "Counseling"];
-  const primaryPanelBadgeIcon = typeof primaryPanel.icon === "string" && primaryPanel.icon !== "hormone-drop" ? primaryPanel.icon : wellnessIcon;
+  const remaining = Math.max(0, minimumCheckoutTotal + 1 - subtotal);
+  const progressPct = Math.min(100, (subtotal / (minimumCheckoutTotal + 1)) * 100);
+  const minimumMet = subtotal >= minimumCheckoutTotal + 1;
+
+  useEffect(() => {
+    if (selectedPanels.length > prevCount.current) {
+      setBadgeKey((k) => k + 1);
+    }
+    if (selectedPanels.length === 0) {
+      setExpanded(false);
+    }
+    prevCount.current = selectedPanels.length;
+  }, [selectedPanels.length]);
+
+  if (selectedCount === 0) return null;
 
   return (
-    <aside className={`cart-panel${visible ? " cart-panel--visible" : ""} ${selectedCount === 0 ? "cart-panel--empty" : "cart-panel--selected"}`}>
-      <div className="cart-panel-header">
-        <h2>Your Selection</h2>
-        <span>{selectedCount} {selectedCount === 1 ? "Item" : "Items"}</span>
-      </div>
+    <>
+      {expanded && (
+        <div
+          className="fcart-backdrop"
+          onClick={() => setExpanded(false)}
+          aria-hidden="true"
+        />
+      )}
 
-      {selectedCount === 0 ? (
-        <>
-          <div className="cart-mobile-empty-card" aria-label="Empty selection cart">
-            <div className="cart-mobile-empty-copy">
-              <span className="cart-mobile-empty-icon">
-                <img src={flaskIcon} alt="" />
-                <span>0</span>
-              </span>
-              <div>
-                <p>Nothing selected yet</p>
-                <span>Choose panels from left to begin.</span>
-              </div>
-            </div>
-            <button className="cart-checkout-button" type="button" onClick={onCheckout}>
-              <img src={addIcon} alt="" />
-              Proceed to checkout
-            </button>
-          </div>
-          <div className="cart-empty-state">
-            <div>
-              <div className="cart-empty-icon">
-                <img src={flaskIcon} alt="" />
-              </div>
-              <p>Nothing selected yet.</p>
-              <span>Choose panels or a package from the left to begin.</span>
-            </div>
-          </div>
-          <div className="cart-panel-progress">
-            <div className="cart-progress-copy">
-              <span>Progress to checkout</span>
-              <span>{progressLabel}</span>
-            </div>
-            <div className="cart-progress-track"><span style={{ width: `${progress}%` }} /></div>
-          </div>
-          <div className="cart-value-props">
-            <p><img src={lockIcon} alt="" /> Secure Genomic Data Handling</p>
-            <p><img src={timeIcon} alt="" /> Turnaround time: 12-15 days</p>
-          </div>
-          <div className="cart-total-row">
-            <span>Subtotal</span>
-            <strong>{selectedCount === 0 ? "₹0" : formatInr(subtotal)}</strong>
-          </div>
-          <button className="cart-checkout-button" type="button" onClick={onCheckout}>
-            <img src={checkoutIcon} alt="" />
-            Proceed to Checkout
-          </button>
-        </>
-      ) : (
-        <>
-          <article className="cart-mobile-selected-card" aria-label="Selected panel cart">
-            <div className="curated-premium-ribbon">Best Value</div>
-            <div className="genetic-ribbon-copy-stack">
-              <span className="type-eyebrow inline-flex items-center gap-2 rounded-full border border-nucleotide-purple/35 bg-[#211b44] px-3 py-1 text-nucleotide-lavender">
-                <img src={primaryPanelBadgeIcon} alt="" className="h-3 w-3" />
-                Elite Healthcare Edition
-              </span>
-              <h2 className="type-section-title">{primaryPanel.title}</h2>
-              <p className="genetic-ribbon-copy type-body text-white/90">{primaryPanelCopy}</p>
-              <div className="genetic-featured-chips flex flex-wrap gap-2">
-                {primaryPanelChips.map((chip) => (
-                  <span key={chip} className="type-chip rounded-full border border-white/20 bg-white/[0.06] px-3 py-1 uppercase tracking-[0.05em] text-white/80">{chip}</span>
-                ))}
-              </div>
-            </div>
-            <div className="curated-premium-price-card">
-              <p className="type-caption text-white">Total Investment</p>
-              <p className="type-price mt-1 text-white">{primaryPanel.price} <span className="type-caption font-normal text-white">/ kit</span></p>
-              <button
-                className="type-button inline-flex items-center justify-center gap-2 rounded-xl bg-nucleotide-purple px-4 py-2.5 text-white"
-                type="button"
-                onClick={() => onAddPanel?.(primaryPanel)}
-              >
-                <img src={addIcon} alt="" className="w-4" /> Add to Selection
-              </button>
-            </div>
-          </article>
-          <section className="cart-sample-card" aria-label="Sample collection">
-            <span className="cart-sample-icon-badge">
-              <img src={flaskIcon} alt="" />
-              <span>{selectedCount}</span>
-            </span>
-            <div className="cart-sample-copy">
-              <p>Sample collection</p>
-              <div>
-                <span className="cart-home-icon" aria-hidden="true">
-                  <svg viewBox="0 0 20 20" fill="none">
-                    <path d="M3.5 9.2 10 4l6.5 5.2M5.25 8.4v7.1h9.5V8.4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M8.2 15.5v-4.1h3.6v4.1" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      {/* Collapsed pill CTA */}
+      {!expanded && selectedCount > 0 && (
+        <button
+          type="button"
+          className="fpb-pill-btn"
+          onClick={() => setExpanded(true)}
+          aria-label={`Panel builder — ${selectedCount} panel${selectedCount !== 1 ? "s" : ""}, ${formatInr(subtotal)}`}
+        >
+          <span className="fpb-pill-icon">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="18" height="18">
+              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
+          <span className="fpb-pill-count">{selectedCount} Panel{selectedCount !== 1 ? "s" : ""}</span>
+          <span className="fpb-pill-divider" aria-hidden="true" />
+          <span className="fpb-pill-price">{formatInr(subtotal)}</span>
+        </button>
+      )}
+
+      {/* Expanded drawer */}
+      {expanded && (
+        <div className="fcart-root">
+          <div className="fcart-drawer">
+
+            {/* Header */}
+            <div className="fcart-drawer-header">
+              <div className="fcart-drawer-heading">
+                <span className="fcart-drawer-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
+                    <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </span>
-                Home collection (Blood sample)
+                <div>
+                  <span className="fcart-drawer-title">Panel Builder</span>
+                  <span className="fcart-drawer-subtitle">Home collection (saliva kit)</span>
+                </div>
               </div>
+              <button
+                type="button"
+                className="fcart-close"
+                aria-label="Close panel builder"
+                onClick={() => setExpanded(false)}
+              >
+                <CloseIcon />
+              </button>
             </div>
-          </section>
 
-          <section className="cart-panel-progress" aria-label="Progress to minimum checkout">
-            <div className="cart-amount-row">
+            {/* Price + minimum row */}
+            <div className="fcart-price-row">
+              <span className="fcart-price-total">{formatInr(subtotal)}</span>
+              <span className="fcart-price-min">of {formatInr(minimumCheckoutTotal)}</span>
+            </div>
+
+            {/* Progress bar */}
+            <div className="fpb-min-indicator">
+              <div className="fpb-min-track">
+                <div
+                  className={`fpb-min-fill${minimumMet ? " fpb-min-fill--met" : ""}`}
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+              <p className={`fpb-min-label${minimumMet ? " fpb-min-label--met" : ""}`}>
+                {minimumMet
+                  ? "✓ Ready to proceed!"
+                  : `Add ${formatInr(remaining)} more to unlock checkout`}
+              </p>
+            </div>
+
+            {/* Item list */}
+            <div className="fcart-list">
+              {selectedPanels.map((panel) => (
+                <div key={panel.title} className="fcart-item">
+                  <span className={`fcart-item-icon genetic-tone-${panel.tone}`}>
+                    <CardIcon icon={panel.icon} />
+                  </span>
+                  <span className="fcart-item-name">{panel.title}</span>
+                  <span className="fcart-item-price">{panel.price}</span>
+                  <button
+                    type="button"
+                    className="fcart-item-remove"
+                    aria-label={`Remove ${panel.title}`}
+                    onClick={() => onRemovePanel(panel.title)}
+                  >
+                    <CloseIcon />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="fcart-total-row">
+              <span>Total</span>
               <strong>{formatInr(subtotal)}</strong>
-              <span>of {formatInr(minimumCheckoutTotal)}</span>
             </div>
-            <div className="cart-progress-track"><span style={{ width: `${progress}%` }} /></div>
-            <p className="cart-ready-text">
-              <TinyCheckIcon />
-              {isReady ? "Ready to proceed!" : `${formatInr(minimumCheckoutTotal - subtotal)} more to checkout`}
-            </p>
-          </section>
 
-          <section className="cart-selected-list" aria-label="Selected panels">
-            {selectedPanels.map((panel) => {
-              const detail = panelDetails[panel.title] || panelDetails["Cancer Risk"];
-              const cartTitle = detail.title.replace(" & Tumor", "").replace(" Genetics", "").replace(" Risk Profile", "");
-
-              return (
-                <article key={panel.title} className="cart-selected-item">
-                  <div className="cart-selected-name">
-                    <span className={`cart-selected-icon genetic-tone-${panel.tone}`}>
-                      <CardIcon icon={panel.icon} />
-                    </span>
-                    <p>{cartTitle}</p>
-                  </div>
-                  <div className="cart-selected-price">
-                    <strong>{panel.price}</strong>
-                    <button type="button" aria-label={`Remove ${panel.title}`} onClick={() => onRemovePanel(panel.title)}>
-                      <CloseIcon />
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
-          </section>
-
-          <div className="cart-total-row cart-total-row--selected">
-            <span>Total</span>
-            <strong>{formatInr(subtotal)}</strong>
+            <button
+              type="button"
+              className="fcart-checkout-btn fpb-addcart-btn"
+              disabled={!minimumMet}
+              title={!minimumMet ? `Add ${formatInr(remaining)} more to continue` : undefined}
+              onClick={() => { setExpanded(false); onCheckout(); }}
+            >
+              + Proceed to checkout
+            </button>
           </div>
-
-          <div className="cart-value-props">
-            {[
-              "Genetic counsellor session included",
-              "Lifetime report access & reanalysis",
-              "Results on dashboard in 12-15 days",
-              "Family member profiles supported",
-            ].map((prop) => (
-              <p key={prop}><TinyCheckIcon /> {prop}</p>
-            ))}
-          </div>
-
-          <button className="cart-checkout-button cart-checkout-button--selected" type="button" onClick={onCheckout}>
-            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <path d="M4 10h11M11 5l5 5-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Proceed to Checkout
-          </button>
-        </>
+        </div>
       )}
-    </aside>
+    </>
   );
 }
 
@@ -2078,56 +2042,49 @@ function MostPopularCategories() {
 const howItWorksSteps = [
   {
     step: "01",
-    title: "Select Your Panel",
-    text: "Browse clinical-grade genetic panels by category or choose a curated package tailored to your health goals.",
-    icon: detailKitIcon,
+    text: "Choose a genetic panel or curated package tailored to your health goals",
   },
   {
     step: "02",
-    title: "At-Home Sample Collection",
-    text: "Receive a collection kit at home. Provide a simple saliva or blood sample — no clinic visit required.",
-    icon: detailDnaIcon,
+    text: "A trained phlebotomist will visit your home for sample collection",
   },
   {
     step: "03",
-    title: "Lab Analysis",
-    text: "Your sample is processed in CAP & NABL certified labs using Whole Genome Sequencing technology.",
-    icon: detailPulseIcon,
+    text: "Your sample is processed in CAP & NABL certified labs using genomic technology",
   },
   {
     step: "04",
-    title: "Genetic Counselor Session",
-    text: "A board-certified genetic counselor walks you through your results and answers your questions 1-on-1.",
-    icon: detailCounselorIcon,
-  },
-  {
-    step: "05",
-    title: "Interactive Report",
-    text: "Access your detailed genomic report on the Nucleotide dashboard — updated as science evolves, for life.",
-    icon: detailCheckIcon,
+    text: "Get your interactive report and review results with a genetic counselor",
   },
 ];
 
 function HowItWorksView() {
   return (
-    <section className="how-it-works-view">
-      <ol className="how-it-works-steps">
-        {howItWorksSteps.map((step, index) => (
-          <li key={step.step} className="how-it-works-step">
-            <div className="how-it-works-step-number">{step.step}</div>
-            {index < howItWorksSteps.length - 1 && <div className="how-it-works-connector" aria-hidden="true" />}
-            <div className="how-it-works-step-body">
-              <span className="how-it-works-icon">
-                <img src={step.icon} alt="" />
-              </span>
-              <div>
-                <h3 className="how-it-works-step-title">{step.title}</h3>
-                <p className="how-it-works-step-text">{step.text}</p>
+    <section className="how-it-works-view genetic-how-works-section">
+      <img src={howWorksDecoA} alt="" aria-hidden="true" className="how-works-deco how-works-deco--tl" />
+      <img src={howWorksDecoB} alt="" aria-hidden="true" className="how-works-deco how-works-deco--bl" />
+      <img src={howWorksDecoB} alt="" aria-hidden="true" className="how-works-deco how-works-deco--tr" />
+      <img src={howWorksDecoA} alt="" aria-hidden="true" className="how-works-deco how-works-deco--br" />
+
+      <div className="genetic-how-works-inner">
+        <div className="gen-section-header gen-section-header--centered genetic-how-works-header">
+          <div className="gen-section-heading-group">
+            <h2 className="type-section-title">How It Works</h2>
+            <p className="gen-section-subtitle">Built to make genetic testing simple, clinical, and easy to understand.</p>
+          </div>
+        </div>
+
+        <ol className="genetic-how-works-grid">
+          {howItWorksSteps.map((step) => (
+            <li key={step.step} className="how-works-step genetic-how-works-step">
+              <div className="how-works-step__badge">Step {Number(step.step)}</div>
+              <div className="how-works-step__card">
+                <p className="how-works-step__desc genetic-how-works-desc">{step.text}</p>
               </div>
-            </div>
-          </li>
-        ))}
-      </ol>
+            </li>
+          ))}
+        </ol>
+      </div>
     </section>
   );
 }
@@ -2165,7 +2122,6 @@ function ExploreCardsScroll({ cards, onOpen, onAddPanel }) {
           >
             {card.overlayBadge && (
               <span className={`gen-card-overlay-badge gen-card-overlay-badge--${card.overlayBadge.variant}`}>
-                {card.overlayBadge.variant === "chosen" ? <StarIcon /> : <LeafIcon />}
                 {card.overlayBadge.label}
               </span>
             )}
@@ -2210,11 +2166,18 @@ function ExploreCardsScroll({ cards, onOpen, onAddPanel }) {
 }
 
 export function GeneticTestingPage({ onMenuClick }) {
-  const { isLoggedIn, authReady, openLoginModal } = useAuth();
+  const { isLoggedIn, openLoginModal } = useAuth();
   const navigate = useNavigate();
   const [selectedPanel, setSelectedPanel] = useState(null);
-  const [selectedPanels, setSelectedPanels] = useState([]);
-  const [pendingPanel, setPendingPanel] = useState(null);
+  const [selectedPanels, setSelectedPanels] = useState(() => {
+    try {
+      const saved = localStorage.getItem("nucleotide_panel_builder");
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem("nucleotide_panel_builder", JSON.stringify(selectedPanels)); } catch {}
+  }, [selectedPanels]);
   const [activeSectionTab, setActiveSectionTab] = useState(sectionTabs[0]);
   const [activePanelTab, setActivePanelTab] = useState(panelTabs[0]);
   const [showCategoryFilter, setShowCategoryFilter] = useState(false);
@@ -2232,12 +2195,6 @@ export function GeneticTestingPage({ onMenuClick }) {
     });
   };
   const handleAddPanel = (panel) => {
-    if (!isLoggedIn) {
-      setPendingPanel(panel);
-      promptLogin();
-      return;
-    }
-
     addPanelToSelection(panel);
   };
   const handleRemovePanel = (panelTitle) => {
@@ -2257,23 +2214,14 @@ export function GeneticTestingPage({ onMenuClick }) {
     }
 
     saveGeneticCheckout();
+    try { localStorage.removeItem("nucleotide_panel_builder"); } catch {}
     navigate("/genetic-tests/cart");
   };
   const handleCheckout = () => {
-    if (!isLoggedIn) {
-      promptLogin();
-      return;
-    }
-
     saveGeneticCheckout();
+    try { localStorage.removeItem("nucleotide_panel_builder"); } catch {}
     window.location.assign("/genetic-tests/cart");
   };
-
-  useEffect(() => {
-    if (!authReady || !isLoggedIn || !pendingPanel) return;
-    addPanelToSelection(pendingPanel);
-    setPendingPanel(null);
-  }, [authReady, isLoggedIn, pendingPanel]);
 
   return (
     <div className="genetic-testing-page min-h-screen overflow-x-hidden bg-white font-poppins text-nucleotide-ink">
@@ -2290,8 +2238,15 @@ export function GeneticTestingPage({ onMenuClick }) {
           <div className="genetic-content-stack min-w-0">
             <HeroSection />
 
-            {/* Tabbed section: Build Your Panel / Curated Packages / How It Works */}
+            {/* Tabbed section: Build Your Panel / Curated Packages */}
             <section className="genetic-section-block genetic-tabs-section">
+              <div className="gen-section-header gen-section-header--centered genetic-approach-header">
+                <div className="gen-section-heading-group">
+                  <h2 className="type-section-title">Choose Your Approach</h2>
+                  <p className="gen-section-subtitle">Build your personalized panel or explore expert curated packages</p>
+                </div>
+              </div>
+
               {/* Sticky tab bar */}
               <div className="genetic-tab-bar sticky top-[5rem] z-30">
                 {sectionTabs.map((tab) => {
@@ -2312,7 +2267,7 @@ export function GeneticTestingPage({ onMenuClick }) {
                   );
                 })}
               </div>
-              {activeSectionTab === "Build Your Panel" && <MobileBuildPanelControls />}
+              {(activeSectionTab === "Build Your Panel" || activeSectionTab === "Curated Packages") && <MobileBuildPanelControls />}
 
               {/* Tab: Build Your Panel */}
               {activeSectionTab === "Build Your Panel" && (
@@ -2339,6 +2294,9 @@ export function GeneticTestingPage({ onMenuClick }) {
                       ))}
                     </div>
                   </div>
+                  <div className="build-panel-how-works">
+                    <HowItWorksView />
+                  </div>
                 </div>
               )}
 
@@ -2346,13 +2304,9 @@ export function GeneticTestingPage({ onMenuClick }) {
               {activeSectionTab === "Curated Packages" && (
                 <div className="genetic-tab-content">
                   <CuratedPackagesView onAddPanel={handleAddPanel} />
-                </div>
-              )}
-
-              {/* Tab: How It Works */}
-              {activeSectionTab === "How It Works" && (
-                <div className="genetic-tab-content">
-                  <HowItWorksView />
+                  <div className="build-panel-how-works">
+                    <HowItWorksView />
+                  </div>
                 </div>
               )}
             </section>
@@ -2375,12 +2329,10 @@ export function GeneticTestingPage({ onMenuClick }) {
           onClose={() => setSelectedPanel(null)}
         />
       )}
-      <CartAside
+      <FloatingCart
         selectedPanels={selectedPanels}
         onRemovePanel={handleRemovePanel}
-        onAddPanel={handleAddPanel}
         onCheckout={handleCheckout}
-        visible={selectedPanels.length > 0}
       />
     </div>
   );

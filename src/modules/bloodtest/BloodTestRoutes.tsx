@@ -423,20 +423,18 @@ export default function App() {
       <Route
         path="/genetic-tests/cart"
         element={
-          <ProtectedRoute>
-            <CartPage
-              cartCount={cartLineCount}
-              items={cartItems}
-              session={session}
-              onSessionUpdate={update}
-            />
-          </ProtectedRoute>
+          <CartPage
+            cartCount={cartLineCount}
+            items={cartItems}
+            session={session}
+            onSessionUpdate={update}
+          />
         }
       />
-      <Route path="/genetic-tests/address" element={<ProtectedRoute><AddressPage cartCount={cartLineCount} items={cartItems} session={session} onSessionUpdate={update} onUpsertGroup={upsertGroup} /></ProtectedRoute>} />
-      <Route path="/genetic-tests/timeslot" element={<ProtectedRoute><TimeSlotPage cartCount={cartLineCount} items={cartItems} session={session} onSessionUpdate={update} onUpsertGroup={upsertGroup} /></ProtectedRoute>} />
-      <Route path="/genetic-tests/payment" element={<ProtectedRoute><PaymentPage cartCount={cartLineCount} items={cartItems} session={session} onSessionUpdate={update} onOrderComplete={clearSession} /></ProtectedRoute>} />
-      <Route path="/genetic-tests/confirmation" element={<ProtectedRoute><ConfirmationPage /></ProtectedRoute>} />
+      <Route path="/genetic-tests/address" element={<AddressPage cartCount={cartLineCount} items={cartItems} session={session} onSessionUpdate={update} onUpsertGroup={upsertGroup} />} />
+      <Route path="/genetic-tests/timeslot" element={<TimeSlotPage cartCount={cartLineCount} items={cartItems} session={session} onSessionUpdate={update} onUpsertGroup={upsertGroup} />} />
+      <Route path="/genetic-tests/payment" element={<PaymentPage cartCount={cartLineCount} items={cartItems} session={session} onSessionUpdate={update} onOrderComplete={clearSession} />} />
+      <Route path="/genetic-tests/confirmation" element={<ConfirmationPage />} />
       <Route path="/blood-test/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
       <Route path="/blood-test/order-details" element={<ProtectedRoute><OrderDetailsPage /></ProtectedRoute>} />
       <Route path="/blood-test/report" element={<ProtectedRoute><ReportPage /></ProtectedRoute>} />

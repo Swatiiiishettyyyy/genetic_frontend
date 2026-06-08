@@ -50,6 +50,12 @@ export const useAuth = (): AuthContextValue => {
   return ctx
 }
 
+function shouldSuppressUnauthorizedLoginModal(): boolean {
+  if (typeof window === 'undefined') return false
+  const path = window.location.pathname
+  return path === '/genetic-tests' || path.startsWith('/genetic-tests/')
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -114,7 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(null)
       setCurrentMember(null)
       setMembers([])
-      setIsLoginModalOpen(true)
+      setIsLoginModalOpen(!shouldSuppressUnauthorizedLoginModal())
     })
   }, [])
 
