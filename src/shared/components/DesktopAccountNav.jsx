@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { cn } from "../../lib/cn.js";
 
 const navItems = [
@@ -33,6 +34,7 @@ function itemIsActive(item, current) {
 export function DesktopAccountNav({ variant = "light", className = "" }) {
   const current = currentLocation();
   const isDark = variant === "dark";
+  const [openMenu, setOpenMenu] = useState(null);
 
   return (
     <nav
@@ -53,7 +55,7 @@ export function DesktopAccountNav({ variant = "light", className = "" }) {
               key={item.label}
               href={item.href}
               className={cn(
-                "whitespace-nowrap font-poppins text-[clamp(0.875rem,0.76rem+0.22vw,1rem)] font-medium leading-none transition focus:outline-none focus:ring-4 focus:ring-nucleotide-purple/15",
+                "whitespace-nowrap font-poppins text-[clamp(0.875rem,0.76rem+0.22vw,1rem)] font-medium leading-none transition focus:outline-none focus-visible:ring-4 focus-visible:ring-nucleotide-purple/15",
                 colorClass
               )}
               aria-current={active ? "page" : undefined}
@@ -64,43 +66,56 @@ export function DesktopAccountNav({ variant = "light", className = "" }) {
         }
 
         return (
-          <div key={item.label} className="group relative">
+          <div
+            key={item.label}
+            className="relative"
+            onMouseEnter={() => setOpenMenu(item.label)}
+            onMouseLeave={() => setOpenMenu(null)}
+            onFocus={() => setOpenMenu(item.label)}
+          >
             <button
               type="button"
               className={cn(
-                "inline-flex items-center gap-1.5 whitespace-nowrap border-0 bg-transparent p-0 font-poppins text-[clamp(0.875rem,0.76rem+0.22vw,1rem)] font-medium leading-none transition focus:outline-none focus:ring-4 focus:ring-nucleotide-purple/15",
+                "inline-flex items-center gap-1.5 whitespace-nowrap border-0 bg-transparent p-0 font-poppins text-[clamp(0.875rem,0.76rem+0.22vw,1rem)] font-medium leading-none transition focus:outline-none focus-visible:ring-4 focus-visible:ring-nucleotide-purple/15",
                 colorClass
               )}
               aria-haspopup="menu"
+              aria-expanded={openMenu === item.label}
+              onClick={() => setOpenMenu((currentMenu) => currentMenu === item.label ? null : item.label)}
             >
               {item.label}
-              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
             </button>
             <div
-              role="menu"
-              className="invisible absolute left-0 top-[calc(100%+0.875rem)] z-[180] min-w-[12rem] rounded-2xl border border-nucleotide-lavender bg-white p-2 opacity-0 shadow-[0_1.125rem_3.5rem_rgba(16,17,41,0.15)] transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+              className={cn(
+                "absolute left-0 top-full z-[180] min-w-[12rem] pt-3 transition",
+                openMenu === item.label ? "visible opacity-100" : "invisible opacity-0"
+              )}
             >
-              {item.items.map((child) => {
-                const childActive = isActiveHref(child.href, current);
-                return (
-                  <a
-                    key={child.label}
-                    href={child.href}
-                    role="menuitem"
-                    className={cn(
-                      "block rounded-xl px-3 py-2.5 font-poppins text-sm font-medium leading-tight transition",
-                      childActive
-                        ? "bg-nucleotide-purple/10 text-nucleotide-purple"
-                        : "text-nucleotide-ink hover:bg-nucleotide-lavender/35 hover:text-nucleotide-purple"
-                    )}
-                    aria-current={childActive ? "page" : undefined}
-                  >
-                    {child.label}
-                  </a>
-                );
-              })}
+              <div
+                role="menu"
+                className="rounded-2xl border border-nucleotide-lavender bg-white p-2 shadow-[0_1.125rem_3.5rem_rgba(16,17,41,0.15)]"
+              >
+                {item.items.map((child) => {
+                  const childActive = isActiveHref(child.href, current);
+                  return (
+                    <a
+                      key={child.label}
+                      href={child.href}
+                      role="menuitem"
+                      className={cn(
+                        "block rounded-xl px-3 py-2.5 font-poppins text-sm font-medium leading-tight transition",
+                        childActive
+                          ? "bg-nucleotide-purple/10 text-nucleotide-purple"
+                          : "text-nucleotide-ink hover:bg-nucleotide-lavender/35 hover:text-nucleotide-purple"
+                      )}
+                      aria-current={childActive ? "page" : undefined}
+                      onClick={() => setOpenMenu(null)}
+                    >
+                      {child.label}
+                    </a>
+                  );
+                })}
+              </div>
             </div>
           </div>
         );

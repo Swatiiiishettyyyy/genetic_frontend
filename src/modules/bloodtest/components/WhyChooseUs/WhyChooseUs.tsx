@@ -40,10 +40,10 @@ export default function WhyChooseUs() {
                 }
               </div>
               <div className="why-choose-text">
-                <div className="type-subhead" style={{ color: '#101129' }}>
+                <div className="type-subhead why-choose-card__title" style={{ color: '#101129' }}>
                   {f.title}
                 </div>
-                <div className="type-lead" style={{ color: '#828282' }}>
+                <div className="type-lead why-choose-card__desc" style={{ color: '#828282' }}>
                   {f.desc}
                 </div>
               </div>

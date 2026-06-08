@@ -56,13 +56,13 @@ export function MobileNavbar({
 
   return (
     <div className={`sticky top-0 z-40 border-b border-nucleotide-lavender/70 bg-white/95 text-nucleotide-ink shadow-[0_0.75rem_2rem_rgba(22,22,22,0.04)] backdrop-blur-xl ${className}`}>
-      <div className="mx-auto flex h-16 w-full max-w-[128rem] items-center justify-between gap-3 px-[clamp(0.875rem,4vw,1.5rem)]">
+      <div className="relative mx-auto flex h-16 w-full max-w-[128rem] items-center justify-between gap-3 px-[clamp(0.875rem,4vw,1.5rem)]">
         {leadingButton}
 
         <a
           href="/"
           aria-label="Nucleotide home"
-          className="mr-auto flex max-w-[10.75rem] min-w-0 items-center gap-1.5 rounded-full px-1 py-1 transition focus:outline-none focus:ring-4 focus:ring-nucleotide-purple/15"
+          className="absolute left-1/2 -translate-x-1/2 flex max-w-[10.75rem] min-w-0 items-center gap-1.5 rounded-full px-1 py-1 transition focus:outline-none focus:ring-4 focus:ring-nucleotide-purple/15"
         >
           <img src={dnaIcon} alt="" className="h-[1.05rem] w-auto shrink-0 object-contain" aria-hidden="true" />
           <img src={wordmark} alt="Nucleotide" className="h-[1.9rem] w-auto min-w-0 object-contain" />

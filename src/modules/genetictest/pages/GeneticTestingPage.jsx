@@ -34,6 +34,7 @@ import curatedFamilyIcon from "../assets/Genetics/curated-packages/Icon-9.svg";
 import curatedHairIcon from "../assets/Genetics/curated-packages/streamline-ultimate_hair-skin-bold.svg";
 import curatedCardioIcon from "../assets/Genetics/curated-packages/Icon-8.svg";
 import badgeCertifiedIcon from "../assets/Genetics/Vector (1).svg";
+import microscopeIcon from "../assets/Genetics/laboratory-microscope-microscope-microbic-microbiological-svgrepo-com.svg";
 import badgeReportIcon from "../assets/Genetics/Vector (2).svg";
 import badgeVerifiedIcon from "../assets/Genetics/Icon-6.svg";
 import badgeSecureIcon from "../assets/Genetics/Icon-11.svg";
@@ -529,6 +530,22 @@ const curatedPackageCards = [
     tone: "orange",
     tags: ["Dermatologic Hair & Nail", "Endocrine", "Immunological", "Vitamins"],
   },
+  {
+    title: "Cardiac & Metabolic Health",
+    text: "Heart risk, lipid response, diabetes and metabolic wellness insights",
+    badge: "Heart Smart",
+    icon: curatedCardioIcon,
+    tone: "rose",
+    tags: ["Cardiac", "Metabolic", "Lipid", "Blood Pressure"],
+  },
+  {
+    title: "Wellness & Longevity",
+    text: "Preventive genomics for inflammation, nutrition, aging and energy",
+    badge: "Preventive",
+    icon: wellnessIcon,
+    tone: "purple",
+    tags: ["Longevity", "Nutrition", "Inflammation", "Vitamins"],
+  },
 ];
 
 const featuredPanelCartItem = {
@@ -677,11 +694,21 @@ function PackageIcon({ name }) {
   return <img src={name} alt="" className="h-4 w-4 object-contain" />;
 }
 
+
+const ShieldLockIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{width:"100%",height:"100%"}}>
+    <path d="M12 2L4 6v5c0 4.97 3.4 9.63 8 10.93C17.6 20.63 21 15.97 21 11V6l-9-4z" fill="currentColor" opacity="0.15" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+    <rect x="9" y="11" width="6" height="5" rx="1" fill="currentColor" opacity="0.9"/>
+    <path d="M10 11V9a2 2 0 1 1 4 0v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <circle cx="12" cy="13.5" r="0.75" fill="white"/>
+  </svg>
+);
+
 const heroBadges = [
-  { icon: badgeCertifiedIcon, label: "CAP & NABL Certified Labs", color: "hero-badge--amber" },
+  { icon: microscopeIcon, label: "CAP & NABL Certified Labs", color: "hero-badge--amber" },
   { icon: badgeVerifiedIcon,  label: "Free One Time Blood Collection", color: "hero-badge--green" },
   { icon: badgeReportIcon,    label: "Interactive Reports", color: "hero-badge--teal" },
-  { icon: badgeSecureIcon,    label: "Secure & Private Data", color: "hero-badge--blue" },
+  { svg: <ShieldLockIcon />, label: "Secure & Private Data", color: "hero-badge--blue" },
 ];
 
 function HeroSection() {
@@ -706,7 +733,7 @@ function HeroSection() {
         {heroBadges.map((badge) => (
           <div key={badge.label} className={`hero-badge ${badge.color}`}>
             <span className="hero-badge-icon-wrap">
-              <img src={badge.icon} alt="" aria-hidden="true" />
+              {badge.svg ? badge.svg : <img src={badge.icon} alt="" aria-hidden="true" />}
             </span>
             <span className="hero-badge-label">{badge.label}</span>
           </div>
@@ -1227,7 +1254,7 @@ function PanelDetailModal({ card, onAddPanel, onClose }) {
             }}
           >
             <img src={addIcon} alt="" className="w-4" />
-            Add to Panel
+            Add Panel
           </button>
         </footer>
       </article>
@@ -1288,7 +1315,7 @@ function CuratedPackageCard({ card, onAddPanel }) {
           })}
         >
           <img src={addIcon} alt="" aria-hidden="true" />
-          Add to Panel
+          Add Panel
         </button>
       </div>
     </article>
@@ -2058,6 +2085,59 @@ const howItWorksSteps = [
   },
 ];
 
+const GEN_WHY_FEATURES = [
+  {
+    icon: microscopeIcon,
+    title: "CAP & NABL Certified Labs",
+    desc: "Every sample is processed in accredited labs with rigorous quality standards.",
+  },
+  {
+    icon: badgeCertifiedIcon,
+    title: "Expert Genetic Counseling",
+    desc: "Board-certified counselors guide you through your results and next steps.",
+  },
+  {
+    icon: badgeReportIcon,
+    title: "Clear Genomic Reports",
+    desc: "Actionable insights delivered in plain language — no medical degree required.",
+  },
+  {
+    icon: badgeSecureIcon,
+    title: "End-to-End Data Privacy",
+    desc: "Your DNA data is encrypted, never sold, and fully under your control.",
+  },
+];
+
+function WhyChooseUsGenetics() {
+  return (
+    <section className="page-section home-section--whychoose" style={{ background: "#fff" }}>
+      <div className="page-inner">
+        <div className="home-section-header">
+          <h2 className="type-section" style={{ color: "#101129", margin: 0, textAlign: "center" }}>
+            Why Choose Nucleotide
+          </h2>
+          <p className="type-lead" style={{ color: "#828282", margin: 0, textAlign: "center", maxWidth: "min(720px, 100%)", fontFamily: "Inter, sans-serif", fontSize: "16px" }}>
+            Precision genomics backed by certified science and human expertise.
+          </p>
+        </div>
+        <div className="grid-4 why-choose-grid">
+          {GEN_WHY_FEATURES.map((f) => (
+            <div key={f.title} className="why-choose-card">
+              <div className="why-choose-icon">
+                <img src={f.icon} alt="" width={24} height={24} style={{ filter: "brightness(0) invert(1)" }} aria-hidden="true" />
+              </div>
+              <div className="why-choose-text">
+                <div className="type-subhead why-choose-card__title" style={{ color: "#101129" }}>{f.title}</div>
+                <div className="type-lead why-choose-card__desc" style={{ color: "#828282" }}>{f.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function HowItWorksView() {
   return (
     <section className="how-it-works-view genetic-how-works-section">
@@ -2294,6 +2374,7 @@ export function GeneticTestingPage({ onMenuClick }) {
                       ))}
                     </div>
                   </div>
+                  <WhyChooseUsGenetics />
                   <div className="build-panel-how-works">
                     <HowItWorksView />
                   </div>
@@ -2304,6 +2385,7 @@ export function GeneticTestingPage({ onMenuClick }) {
               {activeSectionTab === "Curated Packages" && (
                 <div className="genetic-tab-content">
                   <CuratedPackagesView onAddPanel={handleAddPanel} />
+                  <WhyChooseUsGenetics />
                   <div className="build-panel-how-works">
                     <HowItWorksView />
                   </div>
@@ -2320,6 +2402,7 @@ export function GeneticTestingPage({ onMenuClick }) {
             )}
 
           </div>
+
         </div>
       </main>
       {selectedPanel && (

@@ -1936,7 +1936,7 @@ a {
   .genetic-testing-page .build-panel-recommended .gen-recommended-scroll {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 20px;
+    gap: 28px;
     overflow: visible;
     padding-block-end: 0;
   }
@@ -1953,7 +1953,7 @@ a {
   .genetic-testing-page .genetic-tabs-section .genetic-explore-scroll {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 20px;
+    gap: 28px;
     width: 100%;
     margin-inline: 0;
     overflow: visible;
@@ -2118,6 +2118,13 @@ a {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+@media (min-width: 769px) {
+  .genetic-testing-page .curated-packages-view .gen-panel-card:nth-child(n + 7),
+  .genetic-testing-page .curated-packages-view .curated-bento-card:nth-child(n + 7) {
+    display: none;
+  }
+}
+
 .genetic-testing-page .curated-premium-card,
 .genetic-testing-page .curated-bento-card,
 .genetic-testing-page .curated-package-card,
@@ -2212,14 +2219,16 @@ a {
 .hero-badge-icon-wrap {
   display: grid;
   place-items: center;
-  width: clamp(18px, 2.2vmin, 22px);
-  height: clamp(18px, 2.2vmin, 22px);
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
 }
 
-.hero-badge-icon-wrap img {
+.hero-badge-icon-wrap img,
+.hero-badge-icon-wrap svg {
   width: 100% !important;
-  height: 100% !important;
+  height: auto !important;
+  max-height: 100%;
   object-fit: contain;
 }
 
@@ -2227,6 +2236,9 @@ a {
 .hero-badge--amber {
   background: rgba(255, 203, 113, 0.14);
   border: 1px solid rgba(255, 203, 113, 0.55);
+  color: #b97d10;
+}
+.hero-badge--amber .hero-badge-icon-wrap svg {
   color: #b97d10;
 }
 
@@ -2253,6 +2265,29 @@ a {
 
 .hero-badge--blue .hero-badge-icon-wrap img {
   filter: invert(24%) sepia(60%) saturate(2000%) hue-rotate(248deg) brightness(80%);
+}
+.hero-badge--blue .hero-badge-icon-wrap svg {
+  color: #5b21b6;
+}
+
+@media (min-width: 769px) {
+  .genetic-testing-page .hero-badge--amber .hero-badge-icon-wrap,
+  .genetic-testing-page .hero-badge--blue .hero-badge-icon-wrap {
+    width: 18px;
+    height: 18px;
+  }
+
+  .genetic-testing-page .hero-badge--amber .hero-badge-icon-wrap {
+    color: #a46300;
+  }
+
+  .genetic-testing-page .hero-badge--amber .hero-badge-icon-wrap img {
+    filter: brightness(0) saturate(100%) invert(37%) sepia(88%) saturate(974%) hue-rotate(18deg) brightness(92%) contrast(101%);
+  }
+
+  .genetic-testing-page .hero-badge--blue .hero-badge-icon-wrap svg {
+    color: #4c1d95;
+  }
 }
 
 .genetic-testing-page .genetic-ribbon-copy-stack {
@@ -2704,6 +2739,32 @@ a {
   text-align: left;
 }
 
+@media (min-width: 769px) {
+  .genetic-testing-page .gen-section-header:not(.gen-section-header--filter) .type-section-title {
+    font-size: 38px;
+  }
+
+  .genetic-testing-page .gen-section-header:not(.gen-section-header--filter) .gen-section-subtitle {
+    font-size: 18px;
+  }
+
+  .genetic-testing-page .home-section--whychoose .home-section-header .type-section {
+    font-size: 38px;
+  }
+
+  .genetic-testing-page .home-section--whychoose .home-section-header .type-lead {
+    font-size: 18px !important;
+  }
+
+  .genetic-testing-page .hero-badge,
+  .genetic-testing-page .genetic-tab-btn,
+  .genetic-testing-page .sticky-category-chips .type-chip,
+  .genetic-testing-page .package-filter-scroll .type-chip,
+  .genetic-testing-page .genetic-mobile-panel-chip {
+    font-size: 16px;
+  }
+}
+
 .gen-view-all-link {
   flex-shrink: 0;
   color: #8b5cf6;
@@ -2870,7 +2931,7 @@ a {
 
 .gen-card-price {
   font-family: var(--font-heading);
-  font-size: var(--type-price);
+  font-size: 20px;
   font-weight: 600;
   line-height: 1;
   letter-spacing: -0.035em;
@@ -3157,13 +3218,22 @@ a {
   }
 }
 
+/* ── Why Choose genetics — heading size override ─────────────────────── */
+.genetic-testing-page .home-section--whychoose .type-section {
+  font-size: 24px;
+}
+
+.genetic-testing-page .home-section--whychoose {
+  background: transparent !important;
+}
+
 /* ── How It Works view — Blood Test design reused with genetic content ─── */
 
 .genetic-testing-page .genetic-how-works-section {
   position: relative;
   overflow: hidden;
-  border-radius: clamp(14px, 1.8vmin, 20px);
-  background: #ffffff;
+  border-radius: 0;
+  background: transparent;
   padding: clamp(1.5rem, 3.2vw, 3rem) clamp(1rem, 2.4vw, 2rem);
 }
 
@@ -3182,7 +3252,8 @@ a {
   position: absolute;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.42;
+  display: none;
+  opacity: 0;
 }
 
 .genetic-testing-page .how-works-deco--tl {
@@ -3270,7 +3341,7 @@ a {
   margin: 0;
   color: #101129;
   font-family: var(--font-heading);
-  font-size: var(--type-body);
+  font-size: 16px;
   font-weight: 400;
   line-height: var(--lh-body);
 }
@@ -3468,17 +3539,17 @@ a {
 }
 
 .gen-panel-original {
-  font-family: var(--font-heading);
-  font-size: 0.7rem;
+  font-family: var(--font-body);
+  font-size: 12px;
   font-weight: 400;
-  color: #aaa;
+  color: #828282;
   text-decoration: line-through;
   line-height: 1.2;
 }
 
 .gen-panel-price {
   font-family: var(--font-heading);
-  font-size: var(--type-price);
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: #161616;
@@ -6840,6 +6911,21 @@ a {
 
   .genetic-testing-page .curated-bento-grid {
     margin-top: 1rem;
+    padding-inline: 0.75rem;
+  }
+
+  .genetic-testing-page .curated-bento-grid .gen-panel-inner-top {
+    padding: 10px;
+    gap: 6px;
+  }
+
+  .genetic-testing-page .curated-bento-grid .gen-panel-footer {
+    padding: 8px 10px 10px;
+  }
+
+  .genetic-testing-page .curated-bento-grid .gen-panel-body {
+    padding-inline: 10px;
+    gap: 6px;
   }
 
   .genetic-testing-page .build-panel-recommended {
